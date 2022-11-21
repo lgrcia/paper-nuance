@@ -15,5 +15,8 @@ __pycache__
 *.synctex.gz
 *.ipynb_checkpoints*
 
-
+# lgrcia
 workflows/synthetic_injection_recovery/data/lightcurves
+workflows/synthetic_injection_recovery/data/results/**/*.yaml
+workflows/synthetic_injection_recovery/data/params/*.yaml
+**/.DS_Store

@@ -1,12 +1,20 @@
 
+from scripts.make_params import make
+
+for i in range(1, 30000):
+    make(i)
+
+seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")
+methods = ["nuance", "wotan_tls"]
+
+# --------------------
+
+
 wildcard_constraints:
     seed="\d+"
 
-seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")
-print(seeds)
-
 rule:
-    input: [f"data/lightcurves/{seed}.npy" for seed in seeds]
+    input: "figures/result.png"
 
 rule make_lightcurves:
     input: "data/params/{seed, \d+}.yaml"
@@ -14,3 +22,32 @@ rule make_lightcurves:
     conda: "envs/base.yaml"
     script: "scripts/make_lightcurve.py"
 
+rule search:
+    input: 
+        "data/lightcurves/{seed, \d+}.npy",
+        "data/params/{seed, \d+}.yaml"
+    output: "data/results/{method}/{seed}.yaml"
+    conda: "envs/base.yaml"
+    script: "scripts/search_{wildcards.method}.py"
+
+rule plot_lc:
+    input: 
+        "data/lightcurves/{seed, \d+}.npy"
+    output: "figures/lightcurves/{seed}.png"
+    conda: "envs/base.yaml"
+    script: "scripts/plot_lc.py"
+
+rule detection_results:
+    input: 
+        params=expand("data/params/{seed}.yaml", seed=seeds),
+        nuance=expand("data/results/nuance/{seed}.yaml", seed=seeds),
+        wotan=expand("data/results/wotan_tls/{seed}.yaml", seed=seeds),
+    output: "data/results/detections.csv"
+    conda: "envs/base.yaml"
+    script: "scripts/aggregate_detections.py"
+
+rule plot_detection:
+    input: "data/results/detections.csv"
+    output: "figures/result.png"
+    conda: "envs/base.yaml"
+    script: "scripts/plot_result.py"

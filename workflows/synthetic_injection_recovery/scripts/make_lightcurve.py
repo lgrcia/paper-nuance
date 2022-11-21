@@ -7,7 +7,7 @@ from nuance.utils import periodic_transit
 
 seed = int(snakemake.wildcards.seed)
 
-time = np.arange(0, 10, 2/60/24) + 0.23
+time = np.arange(0, 3, 2/60/24)
 
 params = yaml.full_load(open(snakemake.input[0], "r"))
 kernel = tinygp.kernels.quasisep.SHO(params['omega'], params['quality'], sigma=params["sigma"])
