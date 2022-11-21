@@ -1,0 +1,9 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - jax
+  - numpy
+  - pip:
+    - -e /Users/lgrcia/code/nuance
+    - tinygp

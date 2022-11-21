@@ -1,0 +1,16 @@
+
+wildcard_constraints:
+    seed="\d+"
+
+seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")
+print(seeds)
+
+rule:
+    input: [f"data/lightcurves/{seed}.npy" for seed in seeds]
+
+rule make_lightcurves:
+    input: "data/params/{seed, \d+}.yaml"
+    output: "data/lightcurves/{seed}.npy"
+    conda: "envs/base.yaml"
+    script: "scripts/make_lightcurve.py"
+
