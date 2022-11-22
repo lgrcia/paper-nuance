@@ -1,7 +1,9 @@
 
 from scripts.make_params import make
+from pathlib import Path
 
-for i in range(1, 30000):
+Path("data/params").mkdir(exist_ok=True, parents=True)
+for i in range(1, 10):
     make(i)
 
 seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")
@@ -20,6 +22,7 @@ rule make_lightcurves:
     input: "data/params/{seed, \d+}.yaml"
     output: "data/lightcurves/{seed}.npy"
     conda: "envs/base.yaml"
+    priority: 0
     script: "scripts/make_lightcurve.py"
 
 rule search:
@@ -28,6 +31,7 @@ rule search:
         "data/params/{seed, \d+}.yaml"
     output: "data/results/{method}/{seed}.yaml"
     conda: "envs/base.yaml"
+    priority: 1
     script: "scripts/search_{wildcards.method}.py"
 
 rule plot_lc:
@@ -44,10 +48,12 @@ rule detection_results:
         wotan=expand("data/results/wotan_tls/{seed}.yaml", seed=seeds),
     output: "data/results/detections.csv"
     conda: "envs/base.yaml"
+    priority: 2
     script: "scripts/aggregate_detections.py"
 
 rule plot_detection:
     input: "data/results/detections.csv"
     output: "figures/result.png"
     conda: "envs/base.yaml"
+    priority: 3
     script: "scripts/plot_result.py"
