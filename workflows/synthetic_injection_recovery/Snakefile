@@ -4,7 +4,7 @@ from pathlib import Path
 
 Path("data/params").mkdir(exist_ok=True, parents=True)
 for i in range(1, 10):
-    make(i)
+    make()
 
 seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")
 methods = ["nuance", "wotan_tls"]

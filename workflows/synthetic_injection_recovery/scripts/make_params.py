@@ -5,7 +5,10 @@ import sys
 
 argv = sys.argv
 
-def make(seed):
+def make(seed=None):
+    if seed is None:
+        seed = np.random.randint(1, 1e5)
+
     np.random.seed(seed)
 
     params = {
@@ -41,6 +44,6 @@ if __name__=="__main__":
     if len(argv) > 1:
         seed = int(argv[1])
     else:
-        seed = np.random.randint(1, 1e5)
+        seed = None
 
     make(seed)
