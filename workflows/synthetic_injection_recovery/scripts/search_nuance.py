@@ -25,7 +25,7 @@ t0s = time.copy()
 Ds = np.linspace(0.01, 0.1, 8)
 ll, z, vz = nu.linear_search(t0s, Ds, progress=False)
 
-periods = np.linspace(1, 1.8, 2000)
+periods = np.linspace(1, 1.8, 1000)
 llc, llv = nu.periodic_search(periods, progress=False)
 
 i, j = np.unravel_index(np.argmax(llv), llv.shape)

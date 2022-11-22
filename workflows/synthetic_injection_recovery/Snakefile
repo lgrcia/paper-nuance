@@ -3,8 +3,8 @@ from scripts.make_params import make
 from pathlib import Path
 
 Path("data/params").mkdir(exist_ok=True, parents=True)
-for i in range(300):
-    make()
+for i in range(1000):
+    make(i*5)
     #pass
 
 seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")

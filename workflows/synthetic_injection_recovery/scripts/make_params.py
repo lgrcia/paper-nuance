@@ -27,8 +27,8 @@ def make(seed=None):
 
     else:
         params.update({
-            "relative_duration": np.random.uniform(0.1, 20),
-            "relative_depth": np.random.uniform(0.1, 20),
+            "relative_duration": np.random.uniform(0.1, 10),
+            "relative_depth": np.random.uniform(0.1, 5),
         })
 
     params.update({
