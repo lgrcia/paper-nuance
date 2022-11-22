@@ -3,8 +3,9 @@ from scripts.make_params import make
 from pathlib import Path
 
 Path("data/params").mkdir(exist_ok=True, parents=True)
-for i in range(1, 10):
+for i in range(300):
     make()
+    #pass
 
 seeds, = glob_wildcards("data/params/{seed, \d+}.yaml")
 methods = ["nuance", "wotan_tls"]
@@ -16,7 +17,7 @@ wildcard_constraints:
     seed="\d+"
 
 rule:
-    input: "figures/result.png"
+    input: "figures/wotan_tls_result.png"
 
 rule make_lightcurves:
     input: "data/params/{seed, \d+}.yaml"
@@ -50,6 +51,22 @@ rule detection_results:
     conda: "envs/base.yaml"
     priority: 2
     script: "scripts/aggregate_detections.py"
+
+rule detection_method_results:
+    input: 
+        params=expand("data/params/{seed}.yaml", seed=seeds),
+        result=expand("data/results/{method}/{seed}.yaml", seed=seeds, allow_missing=True)
+    output: "data/results/{method}/detections.csv"
+    conda: "envs/base.yaml"
+    priority: 2
+    script: "scripts/aggregate_method_detections.py"
+
+rule plot_method_detection:
+    input: "data/results/{method}/detections.csv"
+    output: "figures/{method}_result.png"
+    conda: "envs/base.yaml"
+    priority: 3
+    script: "scripts/plot_method_result.py"
 
 rule plot_detection:
     input: "data/results/detections.csv"

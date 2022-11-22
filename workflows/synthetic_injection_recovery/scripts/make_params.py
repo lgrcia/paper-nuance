@@ -27,14 +27,14 @@ def make(seed=None):
 
     else:
         params.update({
-            "relative_duration": np.random.uniform(0.1, 5),
-            "relative_depth": np.random.uniform(0.1, 5),
+            "relative_duration": np.random.uniform(0.1, 20),
+            "relative_depth": np.random.uniform(0.1, 20),
         })
 
     params.update({
-        "omega" : 2*np.pi/(params["duration"] * params['relative_duration']),
+        "omega" : 2*np.pi/(2*params["duration"] * params['relative_duration']),
         "quality" : np.random.uniform(10, 100),
-        "sigma" : params["depth"] * params['relative_depth'],
+        "sigma" : params["depth"] * (params['relative_depth']/2)**2,
         "seed" : seed,
     })
 
