@@ -21,16 +21,16 @@ def make(seed=None, amp=None, var=None):
         "error" : 1e-3,
     }
 
-    if seed == 0:
+    if seed == -1:
         return make(var=1000, amp=0.1)
 
     params.update({
-        "relative_duration": amp,
-        "relative_depth": var,
-        "omega" : 2*np.pi/(2*params["duration"] * var),
-        "quality" : np.random.uniform(10, 100),
-        "sigma" : params["depth"] * (amp/2)**2,
-        "seed" : seed,
+        "relative_duration": float(var),
+        "relative_depth": float(amp),
+        "omega" : float(2*np.pi/(2*params["duration"] * var)),
+        "quality" : float(np.random.uniform(10, 100)),
+        "sigma" : float(params["depth"] * (amp/2)**2),
+        "seed" : int(seed),
     })
     
     return params
@@ -42,4 +42,4 @@ if __name__=="__main__":
         seed = None
         
     params = make(seed)
-    yaml.dump(params, open(f"data/params/{seed}.yaml", "w"))
+    yaml.safe_dump(params, open(f"data/params/{seed}.yaml", "w"))

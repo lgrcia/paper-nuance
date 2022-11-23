@@ -3,6 +3,9 @@ import yaml
 import tinygp
 from nuance import Nuance
 from time import time as ctime
+import jax 
+jax.config.update("jax_enable_x64", True)
+
 
 def search(time, flux, error, params, verbose=False):
     # the right one

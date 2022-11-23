@@ -10,12 +10,12 @@ from time import time as ctime
 t0 = ctime()
 
 def trend(time, flux, params):
-    return flatten(time, flux+1., window_length=3*params['duration'], return_trend=True)[1] - 1.
+    return flatten(time, flux+1000., window_length=3*params['duration'], return_trend=True)[1] - 1000.
 
 def search(time, flux, error, params, verbose=False):
-    flatten_trend = trend(time, flux)
+    flatten_trend = trend(time, flux, params)
     flatten_flux = flux - flatten_trend
-    flatten_flux -= np.median(flatten_flux)
+    flatten_flux -= np.mean(flatten_flux)
     flatten_flux += 1.
 
     model = tls(time, flatten_flux, verbose=verbose)

@@ -16,7 +16,7 @@ __pycache__
 *.ipynb_checkpoints*
 
 # lgrcia
-workflows/synthetic_injection_recovery/data/lightcurves
-workflows/synthetic_injection_recovery/data/results/**/*.yaml
-workflows/synthetic_injection_recovery/data/params/*.yaml
+workflows/synthetic_injection_recovery/data/*
+workflows/synthetic_injection_recovery/figures/*
+
 **/.DS_Store

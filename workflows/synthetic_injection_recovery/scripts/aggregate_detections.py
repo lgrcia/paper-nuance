@@ -3,8 +3,7 @@ import yaml
 import numpy as np
 
 results = {
-    "wotan_tls_detected": [],
-    "nuance_detected": [],
+    "detected": [],
     "relative_duration": [],
     "relative_depth": [],
 }
@@ -25,13 +24,13 @@ def right_candidate(t0, period, true_t0, true_period, verbose=False):
     else:
         return same
 
-for p, n, w in zip(snakemake.input.params, snakemake.input.nuance, snakemake.input.wotan):
+print(snakemake.input)
+
+for p, r in zip(snakemake.input.params, snakemake.input.result):
     params = yaml.full_load(open(p, "r"))
-    nuance_result = yaml.full_load(open(n, "r"))
-    wotan_result = yaml.full_load(open(w, "r"))
+    result = yaml.full_load(open(r, "r"))
     t0, period = params['t0'], params['period']
-    results["wotan_tls_detected"].append(right_candidate( t0, period, wotan_result['t0'], wotan_result['period']))
-    results["nuance_detected"].append(right_candidate( t0, period, nuance_result['t0'], nuance_result['period']))
+    results["detected"].append(right_candidate( t0, period, result['t0'], result['period']))
     results["relative_depth"].append(params['relative_depth'])
     results["relative_duration"].append(params['relative_duration'])
 
