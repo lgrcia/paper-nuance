@@ -6,6 +6,7 @@ dependencies:
   - jax
   - numpy
   - pandas
+  - matplotlib
   - pip:
     - -e /Users/lgrcia/code/nuance
     - tinygp

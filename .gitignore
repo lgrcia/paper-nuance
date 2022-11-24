@@ -16,7 +16,16 @@ __pycache__
 *.ipynb_checkpoints*
 
 # lgrcia
-workflows/synthetic_injection_recovery/data/*
-workflows/synthetic_injection_recovery/figures/*
+simple/latex/*
+!simple/latex/ms.tex
+!simple/latex/bib.bib
+!simple/latex/*.cls
+!simple/latex/*.bst
+!simple/latex/*.pdf
+
+
+workflows/**/data/**/*.yaml
+workflows/**/data/**/*.npy
+
 
 **/.DS_Store

@@ -1,0 +1,108 @@
+% Define document class
+\documentclass{aastex631}
+\usepackage{float}
+
+
+\newcommand\twostep{two-step\xspace}
+\newcommand\full{full-fledged\xspace}
+
+% Begin!
+\begin{document}
+
+% Title
+\title{An open source scientific article}
+
+% Author list
+\author{@lgrcia}
+
+% Abstract with filler text
+\begin{abstract}
+    Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+    Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis.
+    Curabitur dictum gravida mauris, consectetuer id, vulputate a, magna.
+    Donec vehicula augue eu neque, morbi tristique senectus et netus et.
+    Mauris ut leo, cras viverra metus rhoncus sem, nulla et lectus vestibulum.
+    Phasellus eu tellus sit amet tortor gravida placerat.
+    Integer sapien est, iaculis in, pretium quis, viverra ac, nunc.
+    Praesent eget sem vel leo ultrices bibendum.
+    Aenean faucibus, morbi dolor nulla, malesuada eu, pulvinar at, mollis ac.
+    Curabitur auctor semper nulla donec varius orci eget risus.
+    Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam.
+    Duis eget orci sit amet orci dignissim rutrum.
+\end{abstract}
+
+% Main body with filler text
+\section*{Introduction}
+\label{sec:intro}
+
+Exoplanets, planets outside our solar system, are discovered at an ever-increasing rate. Beyond the study of their inner structure and atmosphere, they give a unique glimpse to extrasolar systems formation, dynamics, as well as being probes to understand exoplanets' host stars. This is particularly true for systems whose orbital plane is aligned with our line of sight, leading to observable planetary transits. Although these transit signals can be seen in the apparent flux received from their stars (light curves), they are often mixed with other astrophysical and instrumental signals, together referred to as \textit{correlated noise}. If they can be disentangled from these nuisance signals, transits offer a powerful way to detect exoplanets. However, disentangling these signals comes with many challenges.
+\bigskip\\
+The simplest way to find periodic transit signals is to first clean a light curve from nuisance signals before performing the search. Indeed, widely used transit-search algorithms (namely Box-Least-Square algorithms, \cite{}) are capable of detecting transits on flat light curves only containing white noise. This strategy is widely adopted by the community, both using physically-motivated systematic models like \cite{everest1, everest2}, or empirical filtering techniques, such as the ones described and implemented in \cite{wotan}. However, when systematics and variability start to resemble transits, this cleaning step (often referred to as \textit{detrending}) strongly alters the searched signals. In such cases, the only alternative to search for transits is to perform a full-fledged modeling of the light curve, including both transits and correlated noises, and asses the likelihood of the model to the data on a wide parameter space, an approach largely avoided due to its untractable nature. Nonetheless, \citealt{kovacs2016} face the question by asking: \textit{Periodic transit and variability search with simultaneous systematics filtering: Is it worth it?}. This study discards the general benefit of using a full-fledged approach, it fails at exploring the light-curves characteristics for which it becomes necessary. While it might only represent a handful of systems, this cases are extremely valuable for the exoplanetary science community. First, variability may be associated with star-spots that can be probed with the help of planetary transits. A better understanding of these structures benefit both the study of stellar atmospheres and their concerning impact on planetary atmosphere retrievals. Second, the growing interest of the community for ultra-cool dwarf stars comes with observations featuring enhanced red noise, stellar variability and lower transit SNR. Hence, these hidden system are pristine.
+\bigskip\\
+In this paper we present nuance, an algorithm using linear models and gaussian processes to simultaneously search for transits while modeling correlated noises in a tractable way. In \autoref{issues}, we describe the issues inherent to the two-step approach described earlier, and study the parameter space for which commonly used filtering techniques alter transit signals to the point of no detection. In section 2 we describe the tractable full-fledged approach on which nuance is based, and its implementation in an open-source Python package. In section 3, we asses the performance of nuance by computing the recovery rate of planetary transits injected into simulated light curves. In section 4, we use nuance in a case study, to detect a known planet observed by the T E S S but undetected by the TESS pipeline due to its light curve characteristics. In section 5, we use nuance to search for transits in a list of .... Finally, we conclude this paper by providing avenues for the improvement of nuance, from its advantage to search for transits in ground-based observations, to its potential for the detection of multi-planetary systems affected by transit-times variations.
+
+\newpage
+\section{The effect of correlated noise detrending on transit search}\label{issues}
+Two sources of correlated noise particularly justify the need for a detrending step before searching for transits: systematic noises, such as telescope pointing errors or detector ... and stellar variability, such as pulsations, or starspots rotations. In this section, we discuss the impact of such correlated noises on transits detectability, by studying the signal-to-noise (SNR) of a unique event, reduced to the simplified expression (\citealt{pont2006}, Equation 12):
+
+\begin{equation}\label{eq:snr}
+  SNR= \frac{df}{\sqrt{\frac{\sigma_w^2}{n} + \frac{\sigma_r^2}{N_{tr}}}}
+\end{equation}
+
+where $df$ is the relative transit depth, $n$ is the number of points within transit, $N_{tr}$ the number of transits (unity here since we consider single transits), and $\sigma_w$ and $\sigma_c$ are the white and correlated noise standard deviations, the subscript.
+\bigskip\\ 
+
+\subsection{Instrumental noises}
+
+The study from \citealt{pont2006} highlight the importance of accounting for correlated noise ($\sigma_r$) when estimating the yield of transit search campaigns. To demonstrate its point, we simulate a unique transit signal (using the empirical analytical model from \citealt{protopapas}) and compute its SNR using \autoref{eq:snr}, both in the presence and absence of correlated noise (\autoref{fig:issue1}).
+
+\begin{figure}[H]
+    \begin{centering}
+        \includegraphics[width=8.5cm]{../figures/first_issue.pdf}
+        \caption{This is a pretty visualization of the Mandelbrot set.}
+        \label{fig:issue1}
+    \end{centering}
+\end{figure}
+
+As illustrated in \autoref{fig:issue1}, the presence of correlated noise fundamentally limits transit detectability. This issue rapidly motivated the development of systematics detrending algorithms such as the Trend Filtering Algorithm (\textsc{TFA}, \citealt{tfa}, in its primary use case), \textsc{SysRem} (\citealt{sysrem}), or Pixel Level Decorrelation (\textsc{PLD}, \citealt{pld}; see also \textsc{Everest} from \citealt{everest1, everest2}). Most of these methods rely on the shared nature of instrumental signals among light-curves (or neighboring pixels) such that the correction applied should not degrade the transit signal. We note that, except for \textsc{TFA}, these algorithms are mostly applied to space-based continuous observations, that provide continuous stellar baselines and mostly reproducible systematic signals. This is not the case for the vast majority of ground-based observations, in addition subject to periodic daytime interruptions and varying atmospheric extinction.
+
+\subsection{Stellar variability}
+
+Instrumental signals have the benefit to be shared among light curves of the same field, and strongly correlated with measurements from the experimental setup (like detector's temperature, pointing error, sky background or airmass). In opposition, stellar variability is generally unknown and harder to correlate with simultaneous measurements. This gave rise to two types of treatments to reconstruct and remove stellar variability to perform a simpler transit search. One is physically-motivated and make use of Gaussian Processes (e.g. \cite{k2sc}). The other is empirical and make use of filtering algorithms (a wide variety being described in \cite{wotan}). In either case, the complete light curve is modeled while ignoring the presence of transits. In this section, we will study in details the effect of both approaches on transit search, by studying the degradation of a unique transit SNR for a wide variety of stellar variability characteristics.
+\bigskip\\
+Throughout this paper, we simulate stellar variability (and later model it) thanks to Gaussian Processes (GP), employing the physically-motivated stochastically-driven damped simple harmonic oscillator kernel (SHO) presented in \citealt{celerite1} (see Annexe ...). We generate stellar variability thanks to the \texttt{tinygp}\footnote{\href{https://github.com/dfm/tinygp}{https://github.com/dfm/tinygp}} Python package, providing an implententation of the scalable GP method from \citealt{celerite2} powered by \texttt{JAX}\footnote{\href{https://github.com/google/jax}{https://github.com/google/jax}}.
+
+\begin{figure}[H]
+    \begin{centering}
+        \includegraphics[width=\linewidth]{../figures/issue2.pdf}
+        \caption{This is a pretty visualization of the Mandelbrot set.}
+        \label{fig:issue2}
+    \end{centering}
+\end{figure}
+
+In \autoref{fig:issue2}, we simulate a light curve featuring a single transit (again using the model from \citealt{protopapas}), in addition with stellar variability of different timescales and amplitudes. In case \textit{a} (purple in \autoref{fig:issue2}), we model and detrend these signals using the widely-adopted Tukey's biweight filtering method presented in \citealt{tukey} and its implementatation from \texttt{wõtan}\footnote{\href{https://github.com/hippke/wotan}{https://github.com/hippke/wotan}} \citep{wotan} (case a. in purple). In case \textit{b} (red in \autoref{fig:issue2}) we employ the same GP model used to simulate stellar variability to reconstruct it, and remove it from light curves ignoring the presence of a potential transits (as it is the case in unknown transits search). Once transits cleaned from stellar variability, we asses their remaining SNR using \autoref{eq:snr}.
+\bigskip\\
+\autoref{fig:issue2} clearly shows the effect of both detrending techniques on transits SNR, and suggests that this degradation is strongly dependant on the stellar variability characteristics encountered. In order to explore the parameter space for which detrending is the most problematic, we simulate light curves including a single transit and a much wider range of correlated noise characteristics defined with two parameters: $\delta_v$, the relative amplitude of the variability against transit depth; and $\tau_v$ the relative timescale of the variability with respect to the transit duration. To follow this parametrization, we simulate the photometric variability using a GP with an SHO kernel with hyperparameters \footnote{}:
+
+\begin{equation}\label{eq:params}
+    \omega = \frac{\pi}{\tau_v\tau}, \quad 
+    \sigma = \delta_v \frac{\delta^2}{4}  \quad  \text{and}  \quad  
+    Q = 10
+\end{equation}
+
+with $\delta$ and $\tau$ the depth and duration of the simulated transit, similar in all light curves. We fix a relatively high value for the quality factor $Q$ in order to restrict our simulations to strongly periodic variability. The expressions of $\omega$ and $\sigma$ given in \autoref{eq:params} correspond to a periodic signal with a period half that of the transit duration, and a peak to peak amplitude two times that of the transit depth, so that a varibility with $(\tau_v=1, \delta_v=1)$ strongly resembles the simulated transit signal. Then, as in \autoref{fig:issue2}, we reconstruct the variability using a biweight filter with a window length of $3\tau$ (three times the transit duration, an optimal value according to \citealt{wotan}). We then subtract the variability from each light-curve, estimate the resulting transit depth and compute its SNR. \autoref{fig:snr_detrend} shows the remaining SNR values of transits computed this way, after each variability signals with random $(\tau_v, \delta_v)$ have been detrended.
+
+\begin{figure}[H]
+    \begin{centering}
+        \includegraphics[height=10cm]{../../workflows/cleaning_snr/figures/simu1/result.pdf}
+        \caption{This is a pretty visualization of the Mandelbrot set.}
+        \label{fig:snr_detrend}
+    \end{centering}
+\end{figure}
+
+\section{\texttt{nuance}}
+
+
+\bibliography{bib}
+
+\end{document}

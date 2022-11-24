@@ -22,7 +22,7 @@ for i, amp in enumerate(amps):
 # second dataset (random values from 0 to n)
 dataset = Path("data/dataset2/params")
 dataset.mkdir(exist_ok=True, parents=True)
-for i in range(0, 100):
+for i in range(100, 300):
     amp = np.random.uniform(0.1, 5)
     var = np.random.uniform(0.1, 10)
     params = make(amp=amp, var=var, seed=i)
@@ -31,11 +31,11 @@ for i in range(0, 100):
 # third dataset (random values from 0 to a wider n)
 dataset = Path("data/dataset3/params")
 dataset.mkdir(exist_ok=True, parents=True)
-for i in range(0, 100):
+for i in range(100, 300):
     amp = np.random.uniform(0.1, 40)
     var = np.random.uniform(0.1, 40)
     params = make(amp=amp, var=var, seed=i)
-    # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # INPUT FUNCTIONS
 # ---------------

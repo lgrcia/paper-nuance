@@ -1,0 +1,82 @@
+
+from scripts.make_params import make
+from pathlib import Path
+import yaml
+import numpy as np
+from os import path
+
+# DATASET CREATION
+# ----------------
+# first dataset (small grid)
+dataset = Path("data/simu1/params")
+dataset.mkdir(exist_ok=True, parents=True)
+n = 10000
+np.random.seed(42)
+vars = np.random.uniform(0.1, 20, size=n)
+amps = np.random.uniform(0.1, 10, size=n)
+for i, (var, amp) in enumerate(zip(vars, amps)):
+    destination = dataset / f"{i}.yaml"
+    params = make(amp=amp, var=var, seed=i)
+    if not path.exists(destination):
+        yaml.dump(params, open(destination, "w"))
+
+# INPUT FUNCTIONS
+# ---------------
+def dataset_results(wildcards):
+    seeds, = glob_wildcards(f"data/{wildcards.dataset}/params" + "/{seed, \d+}.yaml")
+    return expand(f"data/{wildcards.dataset}/results/{{seed}}.yaml", seed=seeds)
+
+def dataset_params(wildcards):
+    seeds, = glob_wildcards(f"data/{wildcards.dataset}/params" + "/{seed, \d+}.yaml")
+    return expand(f"data/{wildcards.dataset}/params/{{seed}}.yaml", seed=seeds)
+
+seeds, = glob_wildcards(f"data/simu1/params" + "/{seed, \d+}.yaml")
+
+# DAG
+# ---
+wildcard_constraints:
+    seed="\d+"
+
+rule:
+    input: 
+        #[f"figures/dataset1/{method}_result.png" for method in methods],
+        #[f"figures/dataset2/{method}_result.png" for method in methods],
+        [f"data/simu1/results/{seed}.yaml" for seed in seeds],
+        "figures/simu1/result.pdf"
+
+rule make_lightcurves:
+    input: "data/{dataset}/params/{seed, \d+}.yaml"
+    output: "data/{dataset}/lightcurves/{seed}.npy"
+    conda: "envs/base.yaml"
+    priority: 0
+    script: "scripts/make_lightcurve.py"
+
+rule clean:
+    input: 
+        "data/{dataset}/params/{seed, \d+}.yaml",
+        "data/{dataset}/lightcurves/{seed, \d+}.npy"
+    output: "data/{dataset}/results/{seed}.yaml"
+    conda: "envs/base.yaml"
+    priority: 1
+    script: "scripts/clean.py"
+
+# rule plot_lc:
+#     input: 
+#         "data/{dataset}/lightcurves/{seed, \d+}.npy"
+#     output: "figures/{dataset}/lightcurves/{seed}.png"
+#     conda: "envs/base.yaml"
+#     script: "scripts/plot_lc.py"
+
+rule detection_results:
+    input: dataset_results
+    output: "data/{dataset}/results.csv"
+    conda: "envs/base.yaml"
+    priority: 2
+    script: "scripts/aggregate_results.py"
+
+rule plot:
+    input: "data/{dataset}/results.csv"
+    output: "figures/{dataset}/result.pdf"
+    conda: "envs/base.yaml"
+    priority: 3
+    script: "scripts/plot_snr_cleaning.py"
