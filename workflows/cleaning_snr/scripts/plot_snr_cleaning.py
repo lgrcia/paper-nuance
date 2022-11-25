@@ -20,7 +20,7 @@ scale = 1.2
 W = n+1
 H = n+1
 
-fig = plt.figure(None, (1.6*W*scale, H*1.2*scale))
+fig = plt.figure(None, (1.5*W*scale, H*1.2*scale))
 
 def I(i, j):
     return int(j*W + i) + 1
@@ -44,16 +44,16 @@ im = main.imshow(
         stats.y_edge.max()
     ),
     aspect="auto",
-    vmax=15
+    vmax=5
 )
 
-main.set_ylabel(r"$\delta_v \sim \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}}$", fontsize=14)
-main.set_xlabel(r"$\tau_v \sim \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}}$", fontsize=14)
+main.set_ylabel(r"$\delta_v \propto \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}}$", fontsize=14)
+main.set_xlabel(r"$\tau_v \propto \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}}$", fontsize=14)
 params = true_depth
 original_snr = true_depth/np.sqrt(np.mean(error)**2/n)
 
-main.set_title(f"Detrending effect on SNR\n", loc="left")
-main.text(0, stats.y_edge.max()+0.4, f"original SNR: {original_snr:.2f}", color="0.3", va="center")
+main.set_title(f"Detrending effect on SNR", loc="left")
+main.text(0.1, stats.y_edge.max()+0.26, f"original SNR: {original_snr:.2f}", color="0.3", va="center")
 
 # removing some axes
 # ------------------
@@ -107,20 +107,12 @@ for i, v in enumerate(var):
     #fig.add_artist(con)
     #main.plot(v, a, ".", c=pcolor, ms=7, alpha=0.5)
     
-fig.tight_layout(pad=1.5)
-axins = inset_axes(
-    main,
-    width="30%",
-    height="5%",
-    loc="upper right",
-    bbox_to_anchor=(0., 0., 1, 1.08),
-    bbox_transform=main.transAxes,
-    borderpad=0,
-)
-cb = fig.colorbar(im, cax=axins, orientation="horizontal", ticks=[1, 5, 10, 15])
-cb.set_label("SNR", labelpad=-10, x=-.15)
-cb.ax.xaxis.set_ticks_position('top')
-_ = cb.ax.set_xticklabels([1, 5, 10, ">15"]) 
+fig.tight_layout(pad=2)
+axins = main.inset_axes((0.62, 1.03, 0.3, 0.06))
+cb = fig.colorbar(im, cax=axins, orientation="horizontal", ticks=[])
+cb.ax.text(-0.4, 0.5, "0", va="center", ha="right")
+cb.ax.text(5.4, 0.5, "> 5", va="center", ha="left")
+cb.ax.text(3, 1.5, "SNR", va="center", ha="right")
 plt.savefig(snakemake.output[0])
 
 

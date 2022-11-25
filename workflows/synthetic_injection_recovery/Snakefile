@@ -17,7 +17,7 @@ for i, amp in enumerate(amps):
     for j, var in enumerate(vars):
         _i = i*len(amps) + j
         params = make(amp=amp, var=var, seed=_i)
-        yaml.dump(params, open(dataset / f"{_i}.yaml", "w"))
+        # yaml.dump(params, open(dataset / f"{_i}.yaml", "w"))
 
 # second dataset (random values from 0 to n)
 dataset = Path("data/dataset2/params")
@@ -26,7 +26,7 @@ for i in range(100, 300):
     amp = np.random.uniform(0.1, 5)
     var = np.random.uniform(0.1, 10)
     params = make(amp=amp, var=var, seed=i)
-    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+    # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # third dataset (random values from 0 to a wider n)
 dataset = Path("data/dataset3/params")
@@ -35,7 +35,7 @@ for i in range(100, 300):
     amp = np.random.uniform(0.1, 40)
     var = np.random.uniform(0.1, 40)
     params = make(amp=amp, var=var, seed=i)
-    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+   # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # INPUT FUNCTIONS
 # ---------------
@@ -52,11 +52,12 @@ def dataset_params(wildcards):
 wildcard_constraints:
     seed="\d+"
 
-rule:
-    input: 
-        #[f"figures/dataset1/{method}_result.png" for method in methods],
-        #[f"figures/dataset2/{method}_result.png" for method in methods],
-        [f"figures/dataset3/{method}_result.png" for method in methods],
+# rule:
+#     input: 
+#         #[f"figures/dataset1/{method}_result.png" for method in methods],
+#         #[f"figures/dataset2/{method}_result.png" for method in methods],
+#         #[f"figures/dataset3/{method}_result.png" for method in methods],
+#         "figures/final_result.pdf"
 
 rule make_lightcurves:
     input: "data/{dataset}/params/{seed, \d+}.yaml"
@@ -96,3 +97,14 @@ rule plot_detection:
     conda: "envs/base.yaml"
     priority: 3
     script: "scripts/plot_result.py"
+
+rule plot_final:
+    input: 
+        "data/dataset3/results/nuance/detections.csv",
+        "data/dataset3/results/wotan_tls/detections.csv",
+        "data/dataset2/results/nuance/detections.csv",
+        "data/dataset2/results/wotan_tls/detections.csv"
+    output: "figures/final_result.pdf"
+    conda: "envs/base.yaml"
+    priority: 4
+    script: "scripts/plot_final.py"
