@@ -77,7 +77,7 @@ def title(ax, v, a):
 for i, a in enumerate(amp[1::]):
     ax = plt.subplot(H, W, I(W-1, i+1))
     v = b[0] - 1
-    params = make(amp=a, var=v, seed=seed)
+    params = make(delta_v=a, tau_v=v, seed=seed)
     x, y, e = make_lc(params, seed)
     ax.plot(x, y, c="0.5")
     ax.set_ylim(-ymax, ymax)
@@ -94,7 +94,7 @@ for i, a in enumerate(amp[1::]):
 for i, v in enumerate(var):
     ax = plt.subplot(H, W, I(i, 0))
     a = amp[0]
-    params = make(amp=a, var=v, seed=seed)
+    params = make(delta_v=a, tau_v=v, seed=seed)
     x, y, e = make_lc(params, seed)
     plt.plot(x, y, c="0.5")
     ax.set_ylim(-ymax, ymax)

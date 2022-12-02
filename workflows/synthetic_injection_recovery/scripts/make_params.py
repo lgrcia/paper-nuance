@@ -5,13 +5,13 @@ import sys
 
 argv = sys.argv
 
-def make(seed=None, amp=None, var=None):
+def make(seed=None, delta_v=None, tau_v=None):
     if seed is None:
-        if amp is None:
+        if delta_v is None:
             seed = np.random.randint(1, 1e5)
             np.random.seed(seed)
-            amp = np.random.uniform(0.1, 10)
-            var = np.random.uniform(0.1, 5)
+            delta_v = np.random.uniform(0.1, 10)
+            tau_v = np.random.uniform(0.1, 5)
         
     params = {
         "t0" : 0.2,
@@ -22,14 +22,14 @@ def make(seed=None, amp=None, var=None):
     }
 
     if seed == -1:
-        return make(var=1000, amp=0.1)
+        return make(tau_v=1000, delta_v=0.1)
 
     params.update({
-        "relative_duration": float(var),
-        "relative_depth": float(amp),
-        "omega" : float(2*np.pi/(2*params["duration"] * var)),
+        "relative_duration": float(tau_v),
+        "relative_depth": float(delta_v),
+        "omega" : float(np.pi/(params["duration"] * tau_v)),
         "quality" : float(np.random.uniform(10, 100)),
-        "sigma" : float(params["depth"] * (amp/2)**2),
+        "sigma" : float(params["depth"] * delta_v / 2),
         "seed" : int(seed),
     })
     

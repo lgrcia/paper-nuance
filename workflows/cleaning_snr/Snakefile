@@ -13,11 +13,11 @@ dataset.mkdir(exist_ok=True, parents=True)
 n = 10000
 np.random.seed(42)
 vars = np.random.uniform(0.1, 10, size=n)
-amps = np.random.uniform(0.1, 5, size=n)
+amps = np.random.uniform(0.1, 25, size=n)
 for i, (var, amp) in enumerate(zip(vars, amps)):
     destination = dataset / f"{i}.yaml"
     params = make(amp=amp, var=var, seed=i)
-    if not path.exists(destination):
+    if not path.exists(destination) or True:
         yaml.dump(params, open(destination, "w"))
 
 # INPUT FUNCTIONS
