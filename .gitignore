@@ -22,8 +22,9 @@ simple/latex/*
 !simple/latex/*.cls
 !simple/latex/*.bst
 !simple/latex/*.pdf
+.vscode
 
-
+# workflows
 workflows/**/data/**/*.yaml
 workflows/**/data/**/*.npy
 
