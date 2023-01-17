@@ -30,7 +30,9 @@ im = main.imshow(
         stats.y_edge.min(), 
         stats.y_edge.max()
     ),
-    aspect="auto"
+    aspect="auto",
+    vmin=0.,
+    vmax=1.
 )
 main.set_title("wõtan + TLS", loc="left")
 
@@ -49,11 +51,13 @@ zoomw.imshow(
         stats.y_edge.min(), 
         stats.y_edge.max()
     ),
-    aspect="auto"
+    aspect="auto",
+    vmin=0.,
+    vmax=1.
 )
 
 a = (0.5, 1) # xy of lower left box
-b = (10, 5) # xy of upper right box
+b = (10, 25) # xy of upper right box
 pcolor="0.6"
 p = patches.Polygon([a, (a[0], b[1]), (b[0], b[1]), (b[0], a[1])], fill=False, ec=pcolor)
 main.add_patch(p)
@@ -61,8 +65,8 @@ con = patches.ConnectionPatch(xyA=(a[0], b[1]), xyB=(0.1, b[1]-0.1), coordsA="da
 fig.add_artist(con)
 con = patches.ConnectionPatch(xyA=(b[0], a[1]), xyB=(0.1, 0.1), coordsA="data", coordsB="data", axesA=main, axesB=zoomw, color=pcolor)
 fig.add_artist(con)
-zoomw.set_ylim(0.1, 5)
-zoomw.set_xlim(0.1, 10)
+zoomw.set_ylim(0.1, b[1])
+zoomw.set_xlim(0.1, b[0])
 
 # nuance
 # ------
@@ -81,7 +85,9 @@ main.imshow(
         stats.y_edge.min(), 
         stats.y_edge.max()
     ),
-    aspect="auto"
+    aspect="auto",
+    vmin=0.,
+    vmax=1.
 )
 main.set_title("nuance", loc="left")
 
@@ -98,11 +104,11 @@ zoom.imshow(
         stats.y_edge.min(), 
         stats.y_edge.max()
     ),
-    aspect="auto"
+    aspect="auto",
+    vmin=0.,
+    vmax=1.
 )
 
-a = (0.5, 1) # xy of lower left box
-b = (10, 5) # xy of upper right box
 pcolor="0.6"
 p = patches.Polygon([a, (a[0], b[1]), (b[0], b[1]), (b[0], a[1])], fill=False, ec=pcolor)
 main.add_patch(p)
@@ -110,8 +116,8 @@ con = patches.ConnectionPatch(xyA=(a[0], b[1]), xyB=(0.1, b[1]-0.1), coordsA="da
 fig.add_artist(con)
 con = patches.ConnectionPatch(xyA=(b[0], a[1]), xyB=(0.1, 0.1), coordsA="data", coordsB="data", axesA=main, axesB=zoom, color=pcolor)
 fig.add_artist(con)
-zoom.set_ylim(0.1, 5)
-zoom.set_xlim(0.1, 10)
+zoom.set_ylim(0.1, b[1])
+zoom.set_xlim(0.1, b[0])
 main.set_xlabel(xlabel, fontsize=14)
 zoom.set_xlabel(xlabel, fontsize=14)
 

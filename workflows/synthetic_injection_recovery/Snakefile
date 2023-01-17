@@ -16,7 +16,7 @@ vars = np.linspace(0.1, 5, 2)
 for i, amp in enumerate(amps):
     for j, var in enumerate(vars):
         _i = i*len(amps) + j
-        params = make(delta_v=amp, tau_v=var, seed=_i)
+        #params = make(delta_v=amp, tau_v=var, seed=_i)
         # yaml.dump(params, open(dataset / f"{_i}.yaml", "w"))
 
 # second dataset (random values from 0 to n)
@@ -26,7 +26,7 @@ for i in range(1, 10000):
     amp = np.random.uniform(0.1, 25)
     var = np.random.uniform(0.1, 10)
     params = make(delta_v=amp, tau_v=var, seed=i)
-    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+    # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # third dataset (random values from 0 to a wider n)
 dataset = Path("data/dataset3/params")
@@ -35,7 +35,7 @@ for i in range(1, 10000):
     amp = np.random.uniform(0.1, 100)
     var = np.random.uniform(0.1, 40)
     params = make(delta_v=amp, tau_v=var, seed=i)
-    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+    # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # INPUT FUNCTIONS
 # ---------------

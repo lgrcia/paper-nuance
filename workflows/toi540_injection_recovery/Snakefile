@@ -1,0 +1,23 @@
+
+lcs, = glob_wildcards("data/lightcurves/{lc}.csv")
+print(lcs)
+
+rule optimize_gp:
+    input: 
+    output: "data/gp.yaml"
+    conda: "envs/base.yaml"
+    script: "scripts/gp.py"
+
+
+rule search:
+    input: "data/gp.yaml", "data/lightcurves/{lc}.csv"
+    output: "data/results/{lc}.yaml"
+    conda: "envs/base.yaml"
+    script: "scripts/search.py"
+
+rule aggregate:
+    input: ["data/result/{lc}.yaml" for lc in lcs]
+    output: "data/nuance_detections.csv"
+    conda: "envs/base.yaml"
+    script: "scripts/aggregate.py"
+
