@@ -359,7 +359,7 @@ where $G$ is the probability density function of $\mathcal{N}(\Delta, \sigma^2)$
     p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i \right)  \int G_k(\tilde\Delta)\, G(\tilde\Delta)\, d\tilde\Delta
 \end{equation}
 The product of two normal distributions is also a normal distribution, so that the integral in \autoref{eq:ice_int} can be obtained analytically. We have
-\begin{proof}{integral_sympy}
+\begin{proof}{gaussians_product_integral}
     p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i  \right) \frac{1}{\sqrt{2\pi \left(\sigma^{2} + \sigma_{k}^{2}\right)}} e^{- \frac{1}{2}\frac{\left(\Delta -  \Delta_{k}\right)^{2}}{\sigma^{2} + \sigma_{k}^{2}}}
 \end{proof}
 And \autoref{eq:goal} gives 
