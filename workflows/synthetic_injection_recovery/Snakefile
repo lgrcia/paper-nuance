@@ -11,13 +11,13 @@ methods = ["nuance", "wotan_tls"]
 # first dataset (small grid)
 dataset = Path("data/dataset1/params")
 dataset.mkdir(exist_ok=True, parents=True)
-amps = np.linspace(0.1, 5, 2)
-vars = np.linspace(0.1, 5, 2)
+amps = np.linspace(0.1, 10, 10)
+vars = np.linspace(0.1, 10, 10)
 for i, amp in enumerate(amps):
     for j, var in enumerate(vars):
         _i = i*len(amps) + j
         params = make(delta_v=amp, tau_v=var, seed=_i)
-        # yaml.dump(params, open(dataset / f"{_i}.yaml", "w"))
+        yaml.dump(params, open(dataset / f"{_i}.yaml", "w"))
 
 # second dataset (random values from 0 to n)
 dataset = Path("data/dataset2/params")
@@ -26,7 +26,7 @@ for i in range(1, 10000):
     amp = np.random.uniform(0.1, 25)
     var = np.random.uniform(0.1, 10)
     params = make(delta_v=amp, tau_v=var, seed=i)
-    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+    # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # third dataset (random values from 0 to a wider n)
 dataset = Path("data/dataset3/params")
@@ -35,7 +35,7 @@ for i in range(1, 10000):
     amp = np.random.uniform(0.1, 100)
     var = np.random.uniform(0.1, 40)
     params = make(delta_v=amp, tau_v=var, seed=i)
-    yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
+    # yaml.dump(params, open(dataset / f"{i}.yaml", "w"))
 
 # INPUT FUNCTIONS
 # ---------------
@@ -52,12 +52,12 @@ def dataset_params(wildcards):
 wildcard_constraints:
     seed="\d+"
 
-rule:
+rule all:
     input: 
-        #[f"figures/dataset1/{method}_result.png" for method in methods],
+        [f"figures/dataset1/{method}_result.png" for method in methods],
         #[f"figures/dataset2/{method}_result.png" for method in methods],
         #[f"figures/dataset3/{method}_result.png" for method in methods],
-        "figures/final_result.pdf"
+        # "figures/final_result.pdf"
 
 rule make_lightcurves:
     input: "data/{dataset}/params/{seed, \d+}.yaml"

@@ -12,7 +12,7 @@ def make_lc(params, seed):
     kernel = tinygp.kernels.quasisep.SHO(params['omega'], params['quality'], sigma=params["sigma"])
     gp = tinygp.GaussianProcess(kernel, time, diag=params['error']**2)
 
-    transit = periodic_transit(time, params["t0"], params["duration"], params["depth"], P=params["period"])
+    transit = params["depth"]*periodic_transit(time, params["t0"], params["duration"], P=params["period"])
     y = gp.sample(jax.random.PRNGKey(seed)) + transit
     
     error = np.ones_like(y)*params['error']

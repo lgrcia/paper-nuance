@@ -10,21 +10,19 @@ jax.config.update("jax_enable_x64", True)
 def search(time, flux, error, params, verbose=False):
     # the right one
     kernel = tinygp.kernels.quasisep.SHO(params['omega'], params['quality'], sigma=params["sigma"])
-    gp = tinygp.GaussianProcess(kernel, time, diag=params['error']**2, mean=np.median(flux))
     
-    nu = Nuance(time, flux, gp)
+    nu = Nuance(time, flux, params['error'], kernel=kernel, mean=np.median(flux))
     t0s = time.copy()
+
     Ds = np.linspace(0.01, 0.1, 8)
-    ll, z, vz = nu.linear_search(t0s, Ds, progress=verbose)
+    nu.linear_search(t0s, Ds, progress=verbose)
 
     periods = np.linspace(1, 1.8, 1000)
-    llc, llv = nu.periodic_search(periods, progress=verbose)
+    search_data = nu.periodic_search(periods, progress=verbose)
 
-    i, j = np.unravel_index(np.argmax(llv), llv.shape)
-    p0 = periods[i]
-    t0, D = nu.best_periodic_transit(p0)
+    t0, _, P = search_data.best
     
-    return t0, p0, periods, llv.T[j]
+    return t0, P, periods, search_data.Q_snr
 
 if __name__=="__main__":
     
@@ -33,7 +31,7 @@ if __name__=="__main__":
     params = yaml.full_load(open(snakemake.input[1], "r"))
 
     ct0 = ctime()
-    t0, p0, periods, periodogram = search(time, flux, error, params)
+    t0, p0, _, _ = search(time, flux, error, params)
     t = ctime() - ct0
 
     result = {
