@@ -1,11 +1,11 @@
 % Define document class
 \documentclass{aastex631}
+% \usepackage{showyourwork}
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{bm}
-\usepackage[dvipsnames]{xcolor}
 
 
 \newcommand\twostep{two-step\xspace}
@@ -16,6 +16,9 @@
 \newcommand{\set}[1]{\{\,#1\,\}}
 \newcommand{\nuance}{\texttt{nuance}}
 \newcommand{\TODO}{\textcolor{red}{TODO}}
+
+% Cortex style
+\input{\cortex}
 
 % Begin!
 \begin{document}
@@ -105,7 +108,7 @@ As a direct consequence, these same starspots are more likely to be occulted by 
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[height=9cm]{../../workflows/cleaning_snr/figures/simu1/result.pdf}
-        \caption{\TODO}
+        \caption{\TODO{}, and redo plot with top arrows and fix $tau_v$ $delta_v$}
         \label{fig:snr_detrend}
     \end{centering}
 \end{figure}
@@ -356,7 +359,9 @@ where $G$ is the probability density function of $\mathcal{N}(\Delta, \sigma^2)$
     p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i \right)  \int G_k(\tilde\Delta)\, G(\tilde\Delta)\, d\tilde\Delta
 \end{equation}
 The product of two normal distributions is also a normal distribution, so that the integral in \autoref{eq:ice_int} can be obtained analytically. We have
-$$p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i  \right) \frac{1}{\sqrt{2\pi \left(\sigma^{2} + \sigma_{k}^{2}\right)}} e^{- \frac{1}{2}\frac{\left(\Delta -  \Delta_{k}\right)^{2}}{\sigma^{2} + \sigma_{k}^{2}}}$$
+\begin{proof}{integral_sympy}
+    p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i  \right) \frac{1}{\sqrt{2\pi \left(\sigma^{2} + \sigma_{k}^{2}\right)}} e^{- \frac{1}{2}\frac{\left(\Delta -  \Delta_{k}\right)^{2}}{\sigma^{2} + \sigma_{k}^{2}}}
+\end{proof}
 And \autoref{eq:goal} gives 
 \begin{equation}\label{eq:result}
     \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{K}{2}\ln(2\pi) - \frac{1}{2}\sum_k^K \left( \frac{\left(\Delta_{k} -
