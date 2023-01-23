@@ -2192,7 +2192,7 @@ width0pt\relax#1$}\ignorespaces}
 \usepackage{longtable}
 
 %% for editing changes
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 % hyperref link defaults to "blue" (0000ff) as this matches our publisher produced pdf style
 \definecolor{xlinkcolor}{cmyk}{1,1,0,0}
 
