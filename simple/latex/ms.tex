@@ -264,7 +264,7 @@ To instantiate a search, a user can start by creating a \texttt{Nuance} object w
 
     nu = Nuance(time, flux, error, kernel, X)
 \end{lstlisting}
-where \texttt{kernel} is the kernel of the Gaussian Process used to model corelated noise, and \texttt{X} the design matrix of the linear model. In \nuance{}, Gaussian Processes are created through the \texttt{tinygp}\footnote{\href{https://github.com/dfm/tinygp}{https://github.com/dfm/tinygp}} Python package powered by \texttt{JAX}\footnote{\href{https://github.com/google/jax}{https://github.com/google/jax}}, allowing for custom kernels to be built and highly tractable computations. We can then define a set of epochs \texttt{t0} and durations \texttt{Ds} and run the \textit{linear search} with
+where \texttt{kernel} is the kernel of the Gaussian Process used to model corelated noise, and \texttt{X} the design matrix of the linear model. \nuance{} exploits the Gaussian Process implementation from \texttt{tinygp}\footnote{\href{https://github.com/dfm/tinygp}{https://github.com/dfm/tinygp}}, a Python package powered by \texttt{JAX}\footnote{\href{https://github.com/google/jax}{https://github.com/google/jax}} allowing for custom kernels to be built and highly tractable computations. We can then define a set of epochs \texttt{t0} and durations \texttt{Ds} and run the \textit{linear search} with
 \begin{lstlisting}[language=Python]
     import numpy as np
 
@@ -279,30 +279,32 @@ Finally, the \textit{periodic search} is run with
     periods = np.linspace(0.1, 5, 2000)
     search = nu.periodic_search(periods)
 \end{lstlisting}
-From this \texttt{search} object can be computed the best transiting candidate parameters (\texttt{search.best}), the $\mathcal{Q}$ periodogram (\texttt{search.Q\_snr}) as well as valuable information about the transit search. The \texttt{Nuance} object also provides methods to perform transit search on light curves from multi-planetary systems, the advantage of \texttt{nuance} being that the \textit{linear search} only needs to be performed ones, and reused for the search of several transiting candidates. An extensive and maintained online documentation is provided at \href{https://nuance.readthedocs.io}{\texttt{nuance.readthedocs.io}}.
+From this \texttt{search} object, the best transiting candidate parameters can be computed (\texttt{search.best}), or the $\mathcal{Q}$ periodogram retrieved (\texttt{search.Q\_snr}), together with valuable information about the transit search. The \texttt{Nuance} object also provides methods to perform transit search on light curves from multi-planetary systems, the advantage of \texttt{nuance} being that the \textit{linear search} only needs to be performed ones, and reused for the search of several transiting candidates. An extensive and maintained online documentation is provided at \href{https://nuance.readthedocs.io}{\texttt{nuance.readthedocs.io}}.
 
 \newpage
-\section{Validation using transit injection-recovery}\label{simu}
+\section{Validation with injection-recovery}\label{simu}
 In order to validate our algorithm, we assess the transit search capabilities of \texttt{nuance} against commonly used techniques. As demonstrated in \autoref{detrending_effect}, the full-fledged modeling offered by \texttt{nuance} is not always necessary, and becomes beneficial for particular noise characteristics that are relative to the searched transit parameters. Hence, our comparison will be done on the relative parameter space $(\tau, \delta)$ described in \autoref{eq:relative_param_space}, focusing on its formulation by assuming correlated noise in the form of stellar variability (\autoref{eq:relative_params}) simulated using a Gaussian Process with an SHO kernel (\autoref{app_gp}). Ultimately, we demonstrate in this section how \texttt{nuance} compares with commonly used techniques, depending on the similarity between stellar variability and the searched transit signals.
 \\\\
-In what follows, we inject transits in simulated or real datasets, and employ algorithms to recover these transits with the right parameters (hence \textit{injection-recovery}). We consider the transit to be found if the absolute difference between the periods $dP$ and epochs $dT_0$ of the recovered and injected planet follow
+In what follows, we inject transits in simulated or real datasets, and employ algorithms to recover these transits with the right parameters (hence \textit{injection-recovery}). We consider the transit to be found if the absolute difference between the periods $dP$ and epochs $dT_0$ of the recovered and injected planets follow
 $$dP<0.1\;\text{days} \hspace{0.5cm} \text{and} \hspace{0.5cm} dT_0<0.01\;\text{days}$$ 
 
 \newcommand{\wtls}{\texttt{wõtan+TLS}}
 
 \subsection{Comparison with \wtls{} on a simulated light curves}
 
-We start by comparing \texttt{naunce} to a relatively simple method on simulated light curves. As in \autoref{detrending_effect}, this simple method consist in searching for planetary transits by first modeling stellar variability using an optimal biweight filter (implemented in \texttt{wõtan}, \citealt{wotan}), subtracting it from the light-curve, and perform the search on the detrended light curve using an optimal box-least-square algorithm (\texttt{TLS}, \citealt{tls}). We name this method \wtls{}.
+We start by comparing \texttt{naunce} to a relatively simple method on simulated light curves. As in \autoref{detrending_effect}, this simple method consist in searching for planetary transits by first modeling stellar variability using an optimal biweight filter (implemented in \texttt{wõtan} \citep{wotan} using a window size three times that of the injected transit duration), subtracting it from the light-curve, and then perform the search on the detrended light curve using an optimal box-least-square algorithm (\texttt{TLS}, \citealt{tls}). We name this method \wtls{}.
 \\\\
 The dataset consists in 10 000 light curves simulated using the model described in \autoref{app_principle_simulations}. We simulate a common periodic transit among all light curves, of period $P=1.1$ days, epoch $T_0=0.2$ days, duration $D=0.04$ days and depth $\Delta=2\%$. Each light curve consist in a 3 days observation, with an exposure time of 2 minutes, leading to $N=2160$ data points with a normal error of $0.1\%$.
 \\\\
 For a given pair of $(\tau, \delta)$, we simulate stellar variability using a Gaussian Process with an SHO kernel of hyperparameters defined by \autoref{eq:relative_params}, computed with respect to the injected transit parameters $D$ and $\Delta$. The same kernel is used for the search with \texttt{nuance}, an optimal choice on equal footing with the optimal biweight filter employed in the \wtls{} search. We generate 10 000 pairs of $(\tau, \delta)$ such that
-$$\tau \sim \mathcal{U}(0.1, 5)\hspace{0.5cm}\text{and}\hspace{0.5cm} \delta \sim \mathcal{U}(0.1, 10)$$
-with $\mathcal{U}(a, b)$ a uniform distribution of lower bound $a$ and upper bound $b$.
+$$\tau \sim \mathcal{U}(0.1, 40)\hspace{0.5cm}\text{and}\hspace{0.5cm} \delta \sim \mathcal{U}(0.1, 100)$$
+where $\mathcal{U}(a, b)$ denotes a uniform distribution of lower bound $a$ and upper bound $b$.
+\\\\
+The results of these injection-recovery are shown in \autoref{fig:simu} and highlight particularly well the benefit of \nuance{} against \wtls{} on transits corresponding to $\delta > 3$ and $\tau > 2$, i.e. with relatively low transit depth compared to the stellar variability amplitude, and a relatively small duration compared to the stellar variability period. On average, searching a single light curve with \nuance{} took 9 seconds, compared to 8 seconds with \wtls{}. Beyond its increased sensitivity, this metric demonstrates the tractability of \nuance{}, studied in more details in \autoref{}.
+\\\\
+About these results, we note these transit searches were done in a particularly optimal setup, on light curves not all physically realistic, hence demonstrating the performance of \nuance{} on a theoretical basis only. In the next subsection, we perform transits injection-recovery on a real dataset, using more realistic tools and on light curves featuring known planetary transits, hence validating \nuance{} on a realistic multi-planetary dataset.
 
 
-\vfill
-\TODO
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[height=12cm]{../../workflows/synthetic_injection_recovery/figures/final_result.pdf}
