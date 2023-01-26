@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{bm}
+\usepackage{listings}
 
 
 \newcommand\twostep{two-step\xspace}
@@ -16,6 +17,27 @@
 \newcommand{\set}[1]{\{\,#1\,\}}
 \newcommand{\nuance}{\texttt{nuance}}
 \newcommand{\TODO}{\textcolor{red}{TODO}}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{gray!5},
+    commentstyle=\color{gray!70},
+    keywordstyle=\color{Bittersweet},
+    stringstyle=\color{RoyalBlue},
+    basicstyle=\fontsize{7.5}{11}\fontfamily{DejaVuSansMono-TLF}\selectfont,
+    breakatwhitespace=false,         
+    breaklines=true,
+    rulecolor=\color{black!15},
+    numbers=left,
+    numberstyle=\fontsize{7}{11}\fontfamily{DejaVuSansMono-TLF}\selectfont\color{gray!50},
+    framerule=0pt,
+    breakindent=0pt,
+    resetmargins=true,
+    numbersep=5pt,
+    frame=single,
+    aboveskip=1em,
+    belowskip=1em,
+}
+\lstset{style=mystyle}
 
 % Cortex style
 \input{\cortex}
@@ -31,7 +53,7 @@
 
 % Abstract with filler text
 \begin{abstract}
-    We present \nuance{}, an algorithm to search for planetary transits in light curves featuring correlated noise, such as instrumental signals and stellar photometric variability. To deal with these nuisance signals, a common approach consist in cleaning a light curve from correlated noise before searching for transits. However, we show that this approach, based on an incomplete light curve modelling, strongly degrades transit signals, up to the point of no detection. As this degradation depends on the noise characteristics, we explore the parameter space for which it occurs, and quantify its effect on a wide variety of cases. We show that \nuance{} outperforms commonly used transit search algorithms, especially for light curves featuring correlated noise with an amplitude three times greater than the searched transit depth. We perform our tests by injecting transits on synthetic light curves, and on known TESS candidates light curves to assess the performance of our algorithm on realistic multi-planetary systems datasets. Beyond its detection efficiency, we make \nuance{} tractable, \TODO{} times faster than current alternatives based on brute force detrending, and available as a well documented open-source Python package.
+    We present \nuance{}, an algorithm to search for planetary transits in light curves featuring correlated noise, such as instrumental signals and stellar photometric variability. To deal with these nuisance signals, a common approach consist in cleaning a light curve from correlated noise before searching for transits. However, we show that this approach, based on an incomplete modelling of light curves, strongly degrades transit signals, up to the point of no detection. As this degradation depends on the noise characteristics, we explore the parameter space for which it occurs, and quantify its effect on a wide variety of cases. We show that \nuance{} outperforms the detection capabilities of commonly used transit search algorithms, especially for light curves featuring correlated noise with an amplitude three times greater than the searched transit depth. We perform our tests by injecting transits on synthetic light curves, and on known TESS candidates light curves to assess the performance of our algorithm on realistic multi-planetary systems datasets. Beyond its detection efficiency, we make \nuance{} tractable, \TODO{} times faster than current alternatives based on brute force detrending, and available as a well documented open-source Python package.
 \end{abstract}
 
 % Main body with filler text
@@ -66,16 +88,16 @@ where $df$ is the relative transit depth, $n$ is the number of points within tra
 
 As illustrated in \autoref{fig:issue1}, the presence of correlated noise strongly decreases the transit signal SNR, limiting its detection. This issue rapidly motivated the development of systematics detrending algorithms such as the Trend Filtering Algorithm (\textsc{TFA}, \citealt{tfa}, in its primary use case), \textsc{SysRem} (\citealt{sysrem}), or Pixel Level Decorrelation (\textsc{PLD}, \citealt{pld}; see also \textsc{Everest} from \citealt{everest1, everest2}). Most of these methods rely on the shared nature of instrumental signals among light-curves (or neighboring pixels) such that the correction applied should not degrade the transit signal. We note that, except for \textsc{TFA}, these algorithms are mostly applied to space-based continuous observations, that provide continuous stellar baselines and mostly reproducible systematic signals. This is not the case for the vast majority of ground-based observations, in addition subject to periodic daytime interruptions and varying atmospheric extinction.
 
-\subsection{The effect of detrending on transits detectability}
+\subsection{The effect of detrending on transits detectability}\label{detrending_effect}
 
-Instrumental signals have the benefit to be shared among light curves of stars observed with the same instrument, strongly correlated with measurements from the experimental setup (like detector's temperature, pointing error, sky background or airmass), hence we will make the strong assumption that their detrending based on an incomplete model of the light curve, one that ignore transit signals (because unknowns), do not affect the searched signals. In opposition, stellar variability is generally unknown and harder to correlate with simultaneous measurements. This gave rise to two types of treatments in order to reconstruct and detrend stellar variability, and perform transit search on \textit{flattened} light curves. One is physically-motivated and makes use of Gaussian Processes (e.g. \cite{k2sc}). The other is empirical and makes use of filtering algorithms (a wide variety being described in \cite{wotan}). In this section, we will study in details the effect of both approaches on transit detectability, by studying the degradation of a unique transit SNR for a wide variety of stellar variability characteristics.
+Instrumental signals have the benefit to be shared among light curves of stars observed with the same instrument, strongly correlated with measurements from the experimental setup (like detector's temperature, pointing error, sky background or airmass), hence we will make the strong assumption that their detrending based on an incomplete model of the light curve, one that ignore transit signals (because unknowns), do not affect the searched signals. In opposition, stellar variability is generally unknown and harder to correlate with simultaneous measurements. This gave rise to two types of treatments in order to reconstruct and detrend stellar variability, and perform transit search on \textit{flattened} light curves. One is physically-motivated and makes use of Gaussian Processes \citep[e.g.]{k2sc}. The other is empirical and makes use of filtering algorithms (a wide variety being described in \cite{wotan}). In this section, we will study in details the effect of both approaches on transit detectability, by studying the degradation of a unique transit SNR for a wide variety of stellar variability characteristics.
 \\\\
 Throughout this paper, we simulate stellar variability (and later model it) thanks to Gaussian Processes (GP), employing the physically-motivated stochastically-driven damped simple harmonic oscillator kernel (SHO) presented in \citealt{celerite1}. Extensive details about the following simulations can be found in \autoref{app_principle_simulations}.
 
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=\linewidth]{../figures/issue2.pdf}
-        \caption{\TODO}
+        \caption{Simulation of a single non-periodic transit plus various variability signals using the formalism described in \autoref{app_principle_simulations}. For each simulation, the variability is fitted using a biweight filter \citep[in violet]{wotan} and a Gaussian Process (in red, descibed in \autoref{app_gp}, in each case with the same kernel used to generate the data). The fitted variability is then subtracted and the transit SNR computed using \autoref{eq:snr}, with the transit depth estimated as the minimum in-transit flux.}
         \label{fig:issue2}
     \end{centering}
 \end{figure}
@@ -83,7 +105,7 @@ Throughout this paper, we simulate stellar variability (and later model it) than
 In \autoref{fig:issue2}, we simulate a light curve featuring a single transit in addition with stellar variability of different timescales and amplitudes. In case \textit{a} (purple in \autoref{fig:issue2}), we model and detrend these signals using the widely-adopted Tukey's biweight filtering method presented in \citealt{tukey} and its implementatation from \texttt{wõtan}\footnote{\href{https://github.com/hippke/wotan}{https://github.com/hippke/wotan}} \citep{wotan}. In case \textit{b} (red in \autoref{fig:issue2}) we employ the same GP model used to simulate stellar variability to reconstruct and remove it from light curves ignoring the presence of potential transits (the case of unknown transits search). Once transits cleaned from stellar variability, we asses their remaining SNR using \autoref{eq:snr}.
 \\\\
 \autoref{fig:issue2} clearly shows the effect of both detrending techniques on transits SNR, and suggests that this degradation is strongly dependant on the stellar variability characteristics encountered. In order to explore the parameter space for which detrending is the most problematic, we simulate light curves including a single transit and a much wider range of correlated noise characteristics defined with two parameters: $\tau$ the relative timescale of the variability with respect to the transit duration; and $\delta$, the relative amplitude of the variability against transit depth, such that:
-\begin{equation}
+\begin{equation}\label{eq:relative_param_space}
     \tau \propto \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}} \quad \text{and} \quad 
     \delta \propto \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}} 
 \end{equation}
@@ -122,7 +144,7 @@ Let a flux $f$ of a star measured at time $t$ be sampled and aranged in the $(1\
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=0.7\linewidth]{../figures/principle_dataset.pdf}
-        \caption{\TODO}
+        \caption{Simulated light curve containing a periodic transit signal, instrumental systematics, and stellar variability, all described in \autoref{app_principle_simulations}.}
         \label{fig:principle_dataset}
     \end{centering}
 \end{figure}
@@ -222,11 +244,10 @@ $$
 $$
 where $\Delta$ and $\sigma$ are obtained using \autoref{eq:comb} with the last column of $X$ containing a periodic transit signal of period $P$, epoch $T_0$, duration $D$ and depth $1$. This process and the resulting periodogram $\mathcal{Q}$ are shown in \autoref{fig:periodogram}.
 
-
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=0.8\linewidth]{../figures/principle_Q.pdf}
-        \caption{\TODO}
+        \caption{For each period $P$, the joint likelihood $\mathcal{P}(P)$ of matching transits is computed using \autoref{eq:comb}, and the value of the maximum likelihood transit SNR retained as $\mathcal{Q}(P)$.}
         \label{fig:periodogram}
     \end{centering}
 \end{figure}
@@ -235,9 +256,52 @@ The periodic transit of period $P$ with the maximum SNR, i.e. maximizing $\mathc
 
 \newpage
 \subsection{An open-source python package}
-\TODO
+We implement the methods described in this paper in the open-source Python package \nuance{}, hosted on Github\footnote{\href{https://github.com/lgrcia/nuance}{https://github.com/lgrcia/nuance}} with an extensive user documentation\footnote{\href{https://nuance.readthedocs.io}{https://nuance.readthedocs.io}}.
+\\\\
+To instantiate a search, a user can start by creating a \texttt{Nuance} object with
+\begin{lstlisting}[language=Python]
+    from nuance import Nuance
 
-\section{Injection-recovery on simulated data}\label{simu}
+    nu = Nuance(time, flux, error, kernel, X)
+\end{lstlisting}
+where \texttt{kernel} is the kernel of the Gaussian Process used to model corelated noise, and \texttt{X} the design matrix of the linear model. In \nuance{}, Gaussian Processes are created through the \texttt{tinygp}\footnote{\href{https://github.com/dfm/tinygp}{https://github.com/dfm/tinygp}} Python package powered by \texttt{JAX}\footnote{\href{https://github.com/google/jax}{https://github.com/google/jax}}, allowing for custom kernels to be built and highly tractable computations. We can then define a set of epochs \texttt{t0} and durations \texttt{Ds} and run the \textit{linear search} with
+\begin{lstlisting}[language=Python]
+    import numpy as np
+
+    t0s = time.copy()
+    # a range of 20 durations
+    Ds = np.linspace(0.01, 0.2, 10)
+    nu.linear_search(t0s, Ds)
+\end{lstlisting}
+Finally, the \textit{periodic search} is run with
+\begin{lstlisting}[language=Python]
+    # a wide range of periods
+    periods = np.linspace(0.1, 5, 2000)
+    search = nu.periodic_search(periods)
+\end{lstlisting}
+From this \texttt{search} object can be computed the best transiting candidate parameters (\texttt{search.best}), the $\mathcal{Q}$ periodogram (\texttt{search.Q\_snr}) as well as valuable information about the transit search. The \texttt{Nuance} object also provides methods to perform transit search on light curves from multi-planetary systems, the advantage of \texttt{nuance} being that the \textit{linear search} only needs to be performed ones, and reused for the search of several transiting candidates. An extensive and maintained online documentation is provided at \href{https://nuance.readthedocs.io}{\texttt{nuance.readthedocs.io}}.
+
+\newpage
+\section{Validation using transit injection-recovery}\label{simu}
+In order to validate our algorithm, we assess the transit search capabilities of \texttt{nuance} against commonly used techniques. As demonstrated in \autoref{detrending_effect}, the full-fledged modeling offered by \texttt{nuance} is not always necessary, and becomes beneficial for particular noise characteristics that are relative to the searched transit parameters. Hence, our comparison will be done on the relative parameter space $(\tau, \delta)$ described in \autoref{eq:relative_param_space}, focusing on its formulation by assuming correlated noise in the form of stellar variability (\autoref{eq:relative_params}) simulated using a Gaussian Process with an SHO kernel (\autoref{app_gp}). Ultimately, we demonstrate in this section how \texttt{nuance} compares with commonly used techniques, depending on the similarity between stellar variability and the searched transit signals.
+\\\\
+In what follows, we inject transits in simulated or real datasets, and employ algorithms to recover these transits with the right parameters (hence \textit{injection-recovery}). We consider the transit to be found if the absolute difference between the periods $dP$ and epochs $dT_0$ of the recovered and injected planet follow
+$$dP<0.1\;\text{days} \hspace{0.5cm} \text{and} \hspace{0.5cm} dT_0<0.01\;\text{days}$$ 
+
+\newcommand{\wtls}{\texttt{wõtan+TLS}}
+
+\subsection{Comparison with \wtls{} on a simulated light curves}
+
+We start by comparing \texttt{naunce} to a relatively simple method on simulated light curves. As in \autoref{detrending_effect}, this simple method consist in searching for planetary transits by first modeling stellar variability using an optimal biweight filter (implemented in \texttt{wõtan}, \citealt{wotan}), subtracting it from the light-curve, and perform the search on the detrended light curve using an optimal box-least-square algorithm (\texttt{TLS}, \citealt{tls}). We name this method \wtls{}.
+\\\\
+The dataset consists in 10 000 light curves simulated using the model described in \autoref{app_principle_simulations}. We simulate a common periodic transit among all light curves, of period $P=1.1$ days, epoch $T_0=0.2$ days, duration $D=0.04$ days and depth $\Delta=2\%$. Each light curve consist in a 3 days observation, with an exposure time of 2 minutes, leading to $N=2160$ data points with a normal error of $0.1\%$.
+\\\\
+For a given pair of $(\tau, \delta)$, we simulate stellar variability using a Gaussian Process with an SHO kernel of hyperparameters defined by \autoref{eq:relative_params}, computed with respect to the injected transit parameters $D$ and $\Delta$. The same kernel is used for the search with \texttt{nuance}, an optimal choice on equal footing with the optimal biweight filter employed in the \wtls{} search. We generate 10 000 pairs of $(\tau, \delta)$ such that
+$$\tau \sim \mathcal{U}(0.1, 5)\hspace{0.5cm}\text{and}\hspace{0.5cm} \delta \sim \mathcal{U}(0.1, 10)$$
+with $\mathcal{U}(a, b)$ a uniform distribution of lower bound $a$ and upper bound $b$.
+
+
+\vfill
 \TODO
 \begin{figure}[H]
     \begin{centering}
@@ -247,7 +311,7 @@ The periodic transit of period $P$ with the maximum SNR, i.e. maximizing $\mathc
     \end{centering}
 \end{figure}
 
-\section{Comparison with \texttt{Sherlock} on TOI-540}\label{real}
+\subsection{Comparison with \texttt{Sherlock} on TOI-540 real light curves}\label{real}
 
 \section{Performances and limitations}\label{perf}
 
@@ -288,9 +352,9 @@ We simulate the periodic transit signal $\mathcal{T}$ using the simple model des
     \end{gathered}
 \end{equation}
 where the dimensionless parameter c controls the roundness of the transit depth ($c\gg1$ corresponding to a box-shaped transit as shown in \autoref{fig:protopapas}). This analytical model is fully empirical but easily differentiable. From this expression, we get the signal of the single non-periodic transit of unitary depth 
-\begin{equation}\label{eq:protopapas_single}
+\begin{proof}{single_transits}\label{eq:protopapas_single}
     \tau_c(t, T_0, D) = \lim_{P\to \infty} \mathcal{T}(t, P, T_0, D) = -\frac{1}{2}\tan\left(\frac{c}{2}(1-T_0+t)\right) -\frac{1}{2}\tan\left(\frac{c}{2}(1+T_0-t)\right)
-\end{equation}
+\end{proof}
 with epoch $T_0$ and duration $D$.
 
 \begin{figure}[H]
