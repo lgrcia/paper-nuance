@@ -37,12 +37,9 @@ seeds, = glob_wildcards(f"data/simu1/params" + "/{seed, \d+}.yaml")
 wildcard_constraints:
     seed="\d+"
 
-# rule:
-#     input: 
-#         #[f"figures/dataset1/{method}_result.png" for method in methods],
-#         #[f"figures/dataset2/{method}_result.png" for method in methods],
-#         # [f"data/simu1/results/{seed}.yaml" for seed in seeds],
-#         "figures/simu1/result.pdf"
+rule:
+    input: 
+        "figures/simu1/result.pdf"
 
 rule make_lightcurves:
     input: "data/{dataset}/params/{seed, \d+}.yaml"
