@@ -1,11 +1,11 @@
 % Define document class
 \documentclass{aastex631}
+% \usepackage{showyourwork}
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{bm}
-\usepackage[dvipsnames]{xcolor}
 
 
 \newcommand\twostep{two-step\xspace}
@@ -14,6 +14,11 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\set}[1]{\{\,#1\,\}}
+\newcommand{\nuance}{\texttt{nuance}}
+\newcommand{\TODO}{\textcolor{red}{TODO}}
+
+% Cortex style
+\input{\cortex}
 
 % Begin!
 \begin{document}
@@ -26,32 +31,30 @@
 
 % Abstract with filler text
 \begin{abstract}
-    We present \texttt{nuance}, an algorithm to search for planetary transits in light curves featuring correlated noises, such as instrumental signals and stellar photometric variability. Simpler approaches consist in searching for transits in light curves cleaned from correlated noise, where only transit signals would remain. However, we show that commonly used detrending techniques strongly affect transits signal-to-noise, up to the point of no detection when the noise characteristics is close to that of the transits. Focusing on stellar variability, we explore the parameter space for which this degradation occur, and quantify its effect on variety of cases.
+    We present \nuance{}, an algorithm to search for planetary transits in light curves featuring correlated noise, such as instrumental signals and stellar photometric variability. To deal with these nuisance signals, a common approach consist in cleaning a light curve from correlated noise before searching for transits. However, we show that this approach, based on an incomplete light curve modelling, strongly degrades transit signals, up to the point of no detection. As this degradation depends on the noise characteristics, we explore the parameter space for which it occurs, and quantify its effect on a wide variety of cases. We show that \nuance{} outperforms commonly used transit search algorithms, especially for light curves featuring correlated noise with an amplitude three times greater than the searched transit depth. We perform our tests by injecting transits on synthetic light curves, and on known TESS candidates light curves to assess the performance of our algorithm on realistic multi-planetary systems datasets. Beyond its detection efficiency, we make \nuance{} tractable, \TODO{} times faster than current alternatives based on brute force detrending, and available as a well documented open-source Python package.
 \end{abstract}
 
 % Main body with filler text
 \section*{Introduction}
 \label{sec:intro}
 Exoplanets, planets outside our solar system, are discovered at an ever-increasing rate. Beyond the study of their inner structure and atmosphere, they give a unique glimpse to extrasolar systems' formation, dynamics, as well as being probes to understand exoplanets' host stars. This is particularly true for systems whose orbital plane is aligned with our line of sight, leading to observable planetary transits. Although these transit signals can be seen in the apparent flux received from their stars, they are often mixed with other astrophysical and instrumental signals. 
-If they can be disentangled from these nuisance signals, transits offer a powerful way to detect exoplanets. However, disentangling these signals comes with many challenges. Due to their nature we will refer to these signal as correlated noises\\
-Widely used transit-search algorithms (Box-Least-Square algorithms \cite{bls}) are capable of detecting transits on light curves only containing transits and white noise. Hence, the simplest way to find periodic transit signals is to first clean a light curve from nuisance signals before performing the search. This strategy is widely adopted by the community, both using physically-motivated systematics models like \cite{everest1, everest2}, or empirical filtering techniques, such as the ones described and implemented in \cite{wotan}. However, when correlated noises start resembling transits, this cleaning step (often referred to as \textit{detrending}) strongly degrades their detectability. In such cases, the only alternative to search for transits is to perform a full-fledged modeling of the light curve, including both transits and correlated noises, and asses the likelihood of the model to the data on a wide parameter space, an approach largely avoided due to its untractable nature. Nonetheless, \citealt{kovacs2016} ask the question: \textit{Periodic transit and variability search with simultaneous systematics filtering: Is it worth it?}. The latter study discards the general benefit of using a full-fledged approach, but it fails at exploring the light-curves characteristics for which it becomes necessary.\\
+If they can be disentangled from these nuisance signals, transits offer a powerful way to detect exoplanets. However, disentangling these signals comes with many challenges. Due to their nature we will refer to these nuisance signals as correlated noise.
+\\\\
+Widely used transit-search algorithms (\cite{bls}) are capable of detecting transits on light curves containing only transits and white noise. Hence, the simplest way to find periodic transit signals is to first clean a light curve from nuisance signals before performing the search. This strategy is widely adopted by the community, both using physically-motivated systematics models like \cite{everest1, everest2}, or empirical filtering techniques, such as the ones described and implemented in \cite{wotan}. However, when correlated noise start resembling transits, this cleaning step (often referred to as \textit{detrending}) is believed to degrade their detectability. In this case, the only alternative to search for transits is to perform a full-fledged modeling of the light curve, including both transits and correlated noise, and asses the likelihood of the data to the transit model on a wide parameter space, an approach largely avoided due to its intractable nature. Nonetheless, \citealt{kovacs2016} ask: \textit{Periodic transit and variability search with simultaneous systematics filtering: Is it worth it?}, and answer \textit{no}. Although the latter study discards the benefit of using a full-fledged approach in the general case, it fails at exploring the light-curves characteristics for which it becomes necessary.\\
 
 % While it might only represent a handful of systems, this cases are extremely valuable for the exoplanetary science community. First, variability may be associated with star-spots that can be probed with the help of planetary transits. A better understanding of these structures benefit both the study of stellar atmospheres and their concerning impact on planetary atmosphere retrievals. Second, the growing interest of the community for ultra-cool dwarf stars comes with observations featuring enhanced red noise, stellar variability and lower transit SNR. Hence, these hidden system are pristine.$
-We present \texttt{nuance}, an algorithm using linear models and Gaussian processes (GP) to simultaneously search for transits while modeling correlated noise in a tractable way, such as instrumental signals and stellar photometric variability. In \autoref{issues}, we describe the issues inherent to the two-step approach described earlier, and study the parameter space for which commonly used detrending techniques degrade transit signals to the point of no detection. In \autoref{nuance} we describe the tractable full-fledged approach of \texttt{nuance}, and its implementation in an open-source Python package. In \autoref{simu} we assess the performance of \texttt{nuance} by computing the recovery of planetary transits injected into simulated light curves. In section 4, we use nuance in a case study, to detect a known planet observed by the T E S S but undetected by the TESS pipeline due to its light curve characteristics. In section 5, we use nuance to search for transits in a list of .... Finally, we conclude this paper by providing avenues for the improvement of nuance, from its advantage to search for transits in ground-based observations, to its potential for the detection of multi-planetary systems affected by transit-times variations.
+We present \nuance, an algorithm using linear models and Gaussian processes to simultaneously search for transits while modeling correlated noise in a tractable way, such as instrumental signals and stellar photometric variability. In \autoref{issues}, we describe the issues inherent to the detrending approach described earlier, and study the parameter space for which commonly used detrending techniques degrade transit signals to the point of no detection. In \autoref{nuance} we describe the tractable full-fledged approach of  \nuance, and its implementation in an open-source Python package. In \autoref{simu} we assess the performances of \nuance by computing the recovery of planetary transits injected into simulated light curves. In section 4, we use nuance in a case study, to detect a known planet observed by the T E S S but undetected by the TESS pipeline due to its light curve characteristics. In section 5, we use nuance to search for transits in a list of .... Finally, we conclude this paper by providing avenues for the improvement of nuance, from its advantage to search for transits in ground-based observations, to its potential for the detection of multi-planetary systems affected by transit-times variations.
 
-\newpage
 \section{The issue with correlated noise and its detrending}\label{issues}
-Two sources of correlated noise particularly justify the need for a detrending step before searching for transits: instrumental noises (such as telescope pointing errors) and stellar variability (induced by  pulsations or starspots). In this section, we discuss the impact of such correlated noises and their detrending on transits detectability. For simplicity, we will model transit signals using an analytic empirical model described in \citealt{protopapas} (see Annexe).\\ 
+Two sources of correlated noise particularly justify the need for a detrending step before searching for transits: instrumental noises (such as telescope pointing errors) and stellar variability (induced by pulsations or starspots). In this section, we discuss the impact of such correlated noise and its detrending on transits detectability.
 
 \subsection{The effect of correlated noise on transits detectability}
 
 To study transits detectability, we will focus on the signal-to-noise (SNR) of a unique event, reduced to the simplified expression (\citealt{pont2006}, Equation 12):
-
 \begin{equation}\label{eq:snr}
   SNR= \frac{df}{\sqrt{\frac{\sigma_w^2}{n} + \frac{\sigma_c^2}{N_{tr}}}}
 \end{equation}
-
-where $df$ is the relative transit depth, $n$ is the number of points within transit, $N_{tr}$ the number of transits (unity here since we consider a single transit), and $\sigma_w$ and $\sigma_c$ are the white and correlated noise standard deviations. To show the impact of correlated noise on transit detectability, we simulate a unique transit signal and compute its SNR using \autoref{eq:snr}, both in the absence and presence of correlated noise (\autoref{fig:issue1}).
+where $df$ is the relative transit depth, $n$ is the number of points within transit, $N_{tr}$ the number of transits ($N_{tr}=1$ here since we consider a single transit), and $\sigma_w^2$ and $\sigma_c^2$ are the white and correlated noise variances. To show the impact of correlated noise on transit detectability, we simulate a unique transit signal (using \autoref{eq:protopapas_single}) and compute its SNR using \autoref{eq:snr}, both in the absence and presence of correlated noise (\autoref{fig:issue1}).
 
 \begin{figure}[H]
     \begin{centering}
@@ -65,60 +68,68 @@ As illustrated in \autoref{fig:issue1}, the presence of correlated noise strongl
 
 \subsection{The effect of detrending on transits detectability}
 
-Instrumental signals have the benefit to be shared among light curves of stars observed with the same instrument, strongly correlated with measurements from the experimental setup (like detector's temperature, pointing error, sky background or airmass), hence we will make the strong assumption that their detrending based on an incomplete model of the light curve, one that ignore transit signals (because unknowns), do not affect the latter. In opposition, stellar variability is generally unknown and harder to correlate with simultaneous measurements. This gave rise to two types of treatments in order to reconstruct and detrend stellar variability, and perform transit search on \textit{flattened} light curves. One is physically-motivated and make use of Gaussian Processes (e.g. \cite{k2sc}). The other is empirical and make use of filtering algorithms (a wide variety being described in \cite{wotan}). In this section, we will study in details the effect of both approaches on transit detectability, by studying the degradation of a unique transit SNR for a wide variety of stellar variability characteristics.\\
-
+Instrumental signals have the benefit to be shared among light curves of stars observed with the same instrument, strongly correlated with measurements from the experimental setup (like detector's temperature, pointing error, sky background or airmass), hence we will make the strong assumption that their detrending based on an incomplete model of the light curve, one that ignore transit signals (because unknowns), do not affect the searched signals. In opposition, stellar variability is generally unknown and harder to correlate with simultaneous measurements. This gave rise to two types of treatments in order to reconstruct and detrend stellar variability, and perform transit search on \textit{flattened} light curves. One is physically-motivated and makes use of Gaussian Processes (e.g. \cite{k2sc}). The other is empirical and makes use of filtering algorithms (a wide variety being described in \cite{wotan}). In this section, we will study in details the effect of both approaches on transit detectability, by studying the degradation of a unique transit SNR for a wide variety of stellar variability characteristics.
+\\\\
 Throughout this paper, we simulate stellar variability (and later model it) thanks to Gaussian Processes (GP), employing the physically-motivated stochastically-driven damped simple harmonic oscillator kernel (SHO) presented in \citealt{celerite1}. Extensive details about the following simulations can be found in \autoref{app_principle_simulations}.
 
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=\linewidth]{../figures/issue2.pdf}
-        \caption{}
+        \caption{\TODO}
         \label{fig:issue2}
     \end{centering}
 \end{figure}
 
-In \autoref{fig:issue2}, we simulate a light curve featuring a single transit (again using the model from \citealt{protopapas}), in addition with stellar variability of different timescales and amplitudes. In case \textit{a} (purple in \autoref{fig:issue2}), we model and detrend these signals using the widely-adopted Tukey's biweight filtering method presented in \citealt{tukey} and its implementatation from \texttt{wõtan}\footnote{\href{https://github.com/hippke/wotan}{https://github.com/hippke/wotan}} \citep{wotan}. In case \textit{b} (red in \autoref{fig:issue2}) we employ the same GP model used to simulate stellar variability to reconstruct and remove it from light curves ignoring the presence of potential transits (the case of unknown transits search). Once transits cleaned from stellar variability, we asses their remaining SNR using \autoref{eq:snr}.\\
-
-\autoref{fig:issue2} clearly shows the effect of both detrending techniques on transits SNR, and suggests that this degradation is strongly dependant on the stellar variability characteristics encountered. In order to explore the parameter space for which detrending is the most problematic, we simulate light curves including a single transit and a much wider range of correlated noise characteristics defined with two parameters: $\tau_v$ the relative timescale of the variability with respect to the transit duration; and $\delta_v$, the relative amplitude of the variability against transit depth, such that:
+In \autoref{fig:issue2}, we simulate a light curve featuring a single transit in addition with stellar variability of different timescales and amplitudes. In case \textit{a} (purple in \autoref{fig:issue2}), we model and detrend these signals using the widely-adopted Tukey's biweight filtering method presented in \citealt{tukey} and its implementatation from \texttt{wõtan}\footnote{\href{https://github.com/hippke/wotan}{https://github.com/hippke/wotan}} \citep{wotan}. In case \textit{b} (red in \autoref{fig:issue2}) we employ the same GP model used to simulate stellar variability to reconstruct and remove it from light curves ignoring the presence of potential transits (the case of unknown transits search). Once transits cleaned from stellar variability, we asses their remaining SNR using \autoref{eq:snr}.
+\\\\
+\autoref{fig:issue2} clearly shows the effect of both detrending techniques on transits SNR, and suggests that this degradation is strongly dependant on the stellar variability characteristics encountered. In order to explore the parameter space for which detrending is the most problematic, we simulate light curves including a single transit and a much wider range of correlated noise characteristics defined with two parameters: $\tau$ the relative timescale of the variability with respect to the transit duration; and $\delta$, the relative amplitude of the variability against transit depth, such that:
 \begin{equation}
-    \tau_v \propto \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}} \quad \text{and} \quad 
-    \delta_v \propto \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}} 
+    \tau \propto \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}} \quad \text{and} \quad 
+    \delta \propto \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}} 
 \end{equation}
 To follow this parametrization, we simulate the photometric variability using a GP with an SHO kernel with hyperparameters \footnote{}:
-\begin{equation}\label{eq:params}
-    \omega = \frac{\pi}{\tau_v\tau} \quad 
-    \sigma = \delta_v \frac{\delta}{2} \quad  \text{and}  \quad  
+\begin{equation}\label{eq:relative_params}
+    \omega = \frac{\pi}{\tau D} \quad 
+    \sigma = \delta \frac{\Delta}{2} \quad  \text{and}  \quad  
     Q = 10
 \end{equation}
-with $\delta$ and $\tau$ the depth and duration of the simulated transit, similar in all light curves. We fix a relatively high value for the quality factor $Q$ in order to restrict our simulations to strongly periodic variability signals. For $\tau_v=1$ and $\delta_v=1$, the expressions of $\omega$ and $\sigma$ given in \autoref{eq:params} correspond to a periodic signal with a period half that of the transit duration, and a peak to peak amplitude two times that of the transit depth, i.e. strongly resembling the simulated transit signal. As in \autoref{fig:issue2}, we reconstruct the variability using a biweight filter with a window length of $3\tau$ (three times the transit duration, an optimal value according to \citealt{wotan}). We then subtract the variability from each light-curve, estimate the resulting transit depth (using the in-transit minimum flux) and compute its SNR. \autoref{fig:snr_detrend} shows the remaining SNR values of transits computed this way, after each variability signals with random $(\tau_v, \delta_v)$ have been detrended.
+with $\Delta$ and $D$ the depth and duration of the simulated transit, similar in all light curves. 
+% We fix a relatively high value for the quality factor $Q$ in order to restrict our simulations to strongly periodic variability signals. 
+For $\tau=1$ and $\delta=1$, the expressions of $\omega$ and $\sigma$ given in \autoref{eq:relative_params} correspond to a periodic signal with a period half that of the transit duration, and a peak to peak amplitude two times that of the transit depth, i.e. strongly resembling the simulated transit signal. As in \autoref{fig:issue2}, we reconstruct the variability using a biweight filter with a window length of $3D$ (three times the transit duration, an optimal value according to \citealt{wotan}). We then subtract the variability from each light-curve, estimate the resulting transit depth (using the in-transit minimum flux) and compute its SNR. \autoref{fig:snr_detrend} shows the remaining SNR values of transits computed this way, after each variability signals with random $(\tau, \delta)$ have been detrended.
 \\\\
-\autoref{fig:snr_detrend} shows that it exists an entire region of the $(\tau_v, \delta_v)$ parameter space for which detrending degrades transit SNR to the point of no detection ($SNR < 6$). While this region might only represent a fraction of existing exoplanetary systems, we argue that these systems are of great value for the field of exoplanetary science. First, as variability is often linked to the presence of starspots, systems whose  with the stellar photo in is likely to be observed on stars whose equatorial plane lines up with our line of sight, following recent studies on the dynamical evolution of planetary systems \cite{}, hence being most likely to be transited. As a direct consequence, these same starspots are more likely to be occulted by planetary companions, events whose measurement benefits both the study of stellar atmospheres and their concerning impact on planetary atmospheric retrievals \cite{}. Finally, the growing interest of the community for ultra-cool dwarf stars comes with observations done in the infrared, featuring enhanced red noise and variability, leading to lower transit SNR \cite{}. Hence, commonly-used detrending technique (such as the biweight filter studied in this section) make transit-search blind to those pristine systems, motivating the need for a more informed transit search algorithm able to deal with correlated noises. In the next section we present such an algorithm: \texttt{nuance}.
+\autoref{fig:snr_detrend} shows that it exists an entire region of the $(\tau, \delta)$ parameter space for which detrending degrades transit SNR to the point of no detection ($SNR < 6$). While this region might only represent a fraction of existing exoplanetary systems, we argue that these systems are of great value for the field of Exoplanetary Science. Indeed, as variability is often linked to the presence of starspots, systems whose  with the stellar photo 
+
+
+% in is likely to be observed on stars whose equatorial plane lines up with our line of sight, following recent studies on the dynamical evolution of planetary systems \cite{}, hence being most likely to be transited.
+\TODO
+
+As a direct consequence, these same starspots are more likely to be occulted by planetary companions, events whose measurement benefits both the study of stellar atmospheres and their concerning impact on planetary atmospheric retrievals \cite{}. Finally, the growing interest of the community for ultra-cool dwarf stars comes with observations done in the infrared, featuring enhanced red noise and variability, leading to lower transit SNR \cite{}. Hence, commonly-used detrending technique (such as the biweight filter studied in this section) make transit-search blind to those pristine systems, motivating the need for a more informed transit search algorithm able to deal with correlated noise. In the next section we present such an algorithm: \texttt{nuance}.
 
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[height=9cm]{../../workflows/cleaning_snr/figures/simu1/result.pdf}
-        \caption{}
+        \caption{\TODO{}, and redo plot with top arrows and fix $tau_v$ $delta_v$}
         \label{fig:snr_detrend}
     \end{centering}
 \end{figure}
 
 \section{\texttt{nuance}}\label{nuance}
 
-In this section we describe \texttt{nuance}, an algorithm to search for planetary transits in light curves containing correlated noises, such as instrumental signals and stellar photometric variability.
+\texttt{nuance} is an algorithm capable of searching for planetary transits in light curves containing correlated noise, such as instrumental signals and stellar photometric variability.
 \\\\
 Let a flux $f$ of a star measured at time $t$ be sampled and aranged in the $(1\times N)$ column-vector $\bm{f}$. This flux contains instrumental signals, stellar variability and a periodic transit signal that we wish to uncover. An example of such signal is simulated and shown in \autoref{fig:principle_dataset}.
 
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=0.7\linewidth]{../figures/principle_dataset.pdf}
-        \caption{}
+        \caption{\TODO}
         \label{fig:principle_dataset}
     \end{centering}
 \end{figure}
 
 Simultaenously to the flux measurement, we obtained a set of $M$ measurements, aranged in the $(M\times N)$ matrix $\bm{X}$, that can be treated as explanatory variables for $\bm{f}$. Details about the simulation of these signals are provided in \autoref{app_principle_simulations}.
 \\\\
-Ideally, we would detect such  a periodic transit signal by sampling the posterior likelihood of this data to a full-fledge model including stellar variability (more generally correlated noises), instrumental systematics (modeled with explanatory variables), and a periodic transit signal of period $P$, epoch $T_0$, duration $D$ and depth $\Delta$. We would then reduce the posterior likelihood to $p(\bm{f}\vert P)$, its marginalized version over all parameters except the period $P$, producing a transit search periodogram $\mathcal{Q}(P)$. However, this approach has two issues: It is highly intractable, and it may lead to multimodal distributions that are hard to interpret.
+Ideally, we would detect such  a periodic transit signal by sampling the posterior likelihood of this data to a full-fledge model including stellar variability (more generally correlated noise), instrumental systematics (modeled with explanatory variables), and a periodic transit signal of period $P$, epoch $T_0$, duration $D$ and depth $\Delta$. We would then reduce the posterior likelihood to $p(\bm{f}\vert P)$, its marginalized version over all parameters except the period $P$, producing a transit search periodogram $\mathcal{Q}(P)$. However, this approach has two issues: It is highly intractable, and it may lead to multimodal distributions that are hard to interpret.
 \\\\
 Given a period $P$, we instead want to compute the likelihood of a periodic transit signal at the maximum likelihood parameters $\hat T_0$, $\hat D$ and $\hat \Delta$, i.e the periodogram
 \begin{equation}\label{eq:periodogram}
@@ -127,26 +138,26 @@ Given a period $P$, we instead want to compute the likelihood of a periodic tran
         \text{where} \quad (\hat T_0 ,\hat D, \hat \Delta) = \argmax_{T_0, D, \Delta}p(\bm{f} \vert P, T_0 , D, \Delta)
     \end{gathered}
 \end{equation}
-We will do that by adopting the strategy of \cite{foreman2016}, and separate the transit search into two components: the \textit{linear search} and the \textit{periodic search}. During the \textit{linear search}, the likelihood of a single non-periodic transit is computed for a grid of epochs and durations (but not depths, as we will see). Then, the \textit{periodic search} consists in combining these likelihoods to compute the likelihood of the data given a periodic transit signal for a range of periods. These combined likelihoods yield a transit-search periodogram on which the periodic transit detection can be based. \texttt{nuance} differs by modeling the covariance of the light curve with a Gaussian Process, accounting for correlated noise (especially in the form of stellar variability) while keeping the model linear and tractable.
+We will do that by adopting the strategy of \cite{foreman2016}, and separate the transit search into two components: the \textit{linear search} and the \textit{periodic search}. During the \textit{linear search}, the likelihood of a single non-periodic transit is computed for a grid of epochs, durations and depths. Then, the \textit{periodic search} consists in combining these likelihoods to compute the likelihood of the data given a periodic transit signal for a range of periods. These combined likelihoods yield a transit-search periodogram on which the periodic transit detection is based. \texttt{nuance} differs by modeling the covariance of the light curve with a Gaussian Process, accounting for correlated noise (especially in the form of stellar variability) while keeping the model linear and tractable.
 
 \subsection{The \textit{linear search}}\label{linear_search}
 
 During the \textit{linear search}, the goal is to compute the likelihood $p(\bm{f} \vert T , D, \Delta)$ of our data given a single non-periodic transit signal of epoch $T$, duration $D$ and depth $\Delta$, for a grid of epochs, durations and depths.
 \\\\
-To account for correlated noises, we model the light curve $f$ as being drawn from a Gaussian Process such that
+To account for correlated noise, we model the light curve $f$ as being drawn from a Gaussian Process such that
 $$\bm{f} \sim \mathcal{N}(\bm{w X}, \bm{\Sigma})$$
-with mean $\bm{wX}$ (i.e. a linear model of the M explanatory variables with coefficients $\bm{w}$) and covariance $\bm{\Sigma}$. To account for the presence of a single non-periodic transit of epoch $T$ and duration $D$, we compute and append its signal as the last column of the design matrix $\bm{X}$, using the simple transit model from \citealt{protopapas} with a unitary depth. This way, the transit signal is part of the linear model and its depth $\Delta$ can be solved linearly. Under this assumption, the log-likelihood of the data given a single non-periodic transit is analytical
+with mean $\bm{wX}$ (i.e. a linear model of the M explanatory variables with coefficients $\bm{w}$) and covariance $\bm{\Sigma}$. To account for the presence of a single non-periodic transit of epoch $T$ and duration $D$, we compute and append its signal as the last column of the design matrix $\bm{X}$, using the simple transit model from \citealt{protopapas} with a unitary depth (see \autoref{app_proto}). This way, the transit signal is part of the linear model and its depth $\Delta$ can be solved linearly. Under this assumption, the likelihood of the data given a single non-periodic transit is analytical
 \begin{equation} \label{eq:linear_search_ll}
     \ln p(\bm{f} \vert I) = -\frac{1}{2}(\bm{f}-\bm{wX})^T\bm{\Sigma}^{-1}(\bm{f}-\bm{wX}) -  \frac{1}{2}\vert\bm{\Sigma}\vert - \frac{N}{2}\ln 2
 \end{equation}
-and can be computed on a grid of epochs and durations, the transit depth being linearly solved for any $(T, D)$. This \textit{linear search} lead to the set of  log-likelihoods\footnote{This notation omits the vector $\bm{w}_{i,j}$ (except its last value $\Delta_{i,j}$) as it is linearly solved for any given value of $(T_i, F_j)$ and irrelevant in what follows.}
+and can be computed on a grid of epochs and durations, the transit depth being linearly solved for any $(T, D)$. This \textit{linear search} lead to the set of likelihoods\footnote{This notation omits the vector $\bm{w}_{i,j}$ (except its last value $\Delta_{i,j}$) as it is linearly solved for any given value of $(T_i, F_j)$ and irrelevant in what follows.}
 $$\ln\mathcal{L} = \{\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})\}_{i, j}$$
-were $\Delta_{i,j}$ is the depth linearly solved for a given $(D_i, T_j)$. \autoref{fig:linear_search} shows this likelihood grid computed for the simulated dataset shown in \autoref{fig:principle_dataset}, using the same Gaussian Process and design matrix $\bm{X}$ used to simulate the data (see annexe).
+were $\Delta_{i,j}$ is the depth linearly solved for a given $(T_i, D_j)$. \autoref{fig:linear_search} shows this likelihood grid computed for the simulated dataset shown in \autoref{fig:principle_dataset}, using the same Gaussian Process and design matrix $\bm{X}$ used to simulate the data (see \autoref{app_gp}).
 
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=0.95\linewidth]{../figures/principle_linear_search.pdf}
-        \caption{Principle and output of the \textit{linear search}. First, a set of durations and depths $\set{T_i, D_j}_{i,j}$ is generated. For each pair of index $(i,j)$, the log likelihood $\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})$ is computed, using the parameters from \autoref{eq:ls} and the expression of \autoref{eq:linear_search_ll}. This process yields the grid of log-likelihoods $\ln\mathcal{L}$ (bottom plot), as well as the $\set{\Delta_{i,j}, \sigma_{i,j}}_{i, j}$ transit depths and errors.}
+        \caption{Principle and output of the \textit{linear search}. First, a set of durations and depths $\set{T_i, D_j}_{i,j}$ is generated. For each pair of index $(i,j)$, the likelihood $\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})$ is computed, using the parameters from \autoref{eq:ls} and the expression of \autoref{eq:linear_search_ll}. This process yields the grid of likelihoods $\ln\mathcal{L}$ (bottom plot), as well as the $\set{\Delta_{i,j}, \sigma_{i,j}}_{i, j}$ transit depths and errors inferred linearly.}
         \label{fig:linear_search}
     \end{centering}
 \end{figure}
@@ -174,7 +185,7 @@ where $\set{T_k}_k$ are the epochs matching $(T_0, P)$ and $\set{\Delta_k}_k$ th
 $$
     \ln p(\bm{f} \vert P, T_0 ,D, \Delta) = \sum_k^K \ln \mathcal{L}_k
 $$
-This is the joint log-likelihood of transits belonging to the same periodic signal but with varying depths  $\set{\Delta_k}_k$. However, individual transits from a periodic signal cannot be considered independent, and should instead share a common transit depth $\Delta$. We show in \autoref{combining_transits} that there is an analytical expression for the joint log-likelihood of K individual transits with depths and errors $\set{\Delta_k, \sigma_k}_k$ assuming a common depth $\Delta$:
+This is the joint likelihood of transits belonging to the same periodic signal but with varying depths  $\set{\Delta_k}_k$. However, individual transits from a periodic signal cannot be considered independent, and should instead share a common transit depth $\Delta$. We show in \autoref{combining_transits} that there is an analytical expression for the joint likelihood of K individual transits with depths and errors $\set{\Delta_k, \sigma_k}_k$ assuming a common depth $\Delta$:
 \begin{equation}\label{eq:comb}
     \begin{gathered}
         \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{K}{2}\ln(2\pi) - \frac{1}{2}\sum_k^K \left( \frac{\left(\Delta_{k} -
@@ -183,16 +194,16 @@ This is the joint log-likelihood of transits belonging to the same periodic sign
         \Delta = \sigma^2 \sum_k^K {\frac{\Delta_k}{\sigma_k^2}}
     \end{gathered}
 \end{equation}
-While this gives a solution for \autoref{eq:goal}\footnote{Different from the one found in \cite{foreman2016}}, the individual epochs matching $T_0$ and $P$ are not necessarily available in the grid of epochs $\set{T_k}_k$. In \cite{foreman2016} this is solved by using the nearest neighbors in the epochs grid. Instead, to allow the efficient matrix computation of \autoref{eq:comb}, we interpolate the likelihood grid from $\set{T_i}_i$ to a common grid of transit phases $\set{\phi_i}_i$, leading to the \textit{periodic search} log-likelihood
+While this gives a solution for \autoref{eq:goal}, the individual epochs matching $T_0$ and $P$ are not necessarily available in the grid of epochs $\set{T_k}_k$. In \cite{foreman2016} a similar issue is solved by using the nearest neighbors in the epochs grid. Instead, to allow the efficient matrix computation of \autoref{eq:comb}, we interpolate the likelihood grid from $\set{T_i}_i$ to a common grid of transit phases $\set{\phi_i}_i$, leading to the \textit{periodic search} log-likelihood
 $$\ln\mathcal{P}(P) = \set{\ln p(\bm{f} \vert P, \phi, D)}_{i,j}$$
-shown for few periods in \autoref{fig:periodic_search}.b, a notation where $\Delta_{i,j}$ is omitted since being interpolated from the \textit{linear search} using $\phi_i$ and $D_j$, and $T_0 = 0$.
+shown for few periods in \autoref{fig:periodic_search}.b. In the latter equation, $\Delta_{i,j}$ is omitted since being interpolated from the \textit{linear search} using $\phi_i$, $D_j$ and $T_0 = 0$.
 
 \begin{figure}[H]
     \begin{centering}
         \gridline{\fig{../figures/principle_periodic_0.pdf}{0.95\linewidth}{\vspace{-0.5cm}(a) $\ln \mathcal{L}$}}
         \vspace{-0.6cm}
         \gridline{\fig{../figures/principle_periodic_1.pdf}{0.72\linewidth}{\vspace{-0.5cm}(b) $\mathcal{P}(P)$}}
-        \caption{On the example dataset, this figure shows how the \textit{periodic search} works at different periods $P$ (including the true period $P = 0.7$ days). Given $P$ and $T_0=0$, the log-likelihood $\ln\mathcal{L}$ shown in (a) is phase-folded and interpolated onto a common grid of phases shown in (b). As an example, the white lines in (a) mark the edges of each fold for a period of $P=0.5$ days, and the white crosses the epochs $\set{T_k}_{k\in\mathbb{K}}$ matching a particular phase in the grid (reported in (a) and (b)) on which the corresponding $\set{\ln \mathcal{L}_k}_{k\in\mathbb{K}}$ are interpolated and combined using \autoref{eq:comb}. To allow the use of efficient matrix computations, this is done for every duration $\set{D_i}_i$ so that $\mathcal{P}$ is computed on the full grid $\set{D_i, \phi_i}_{i, j}$ at once. We understand from plots in (a) that a different choice of epoch $T_0$ may only shift the results in phase but do not affect the values of $\mathcal{P}$. For this reason, computing $\mathcal{P}$ for $T_0=0$ is sufficient. We also notice how the maximum value of $\mathcal{P}(P=0.35)$ is lower than for $P=0.7$ days, a result of combining the log-likelihoods using \autoref{eq:comb} instead of \autoref{eq:attempt}, in favor of individual transits matching a common depth $\Delta$.}
+        \caption{On the example dataset, this figure shows how the \textit{periodic search} works at different periods $P$ (including the true period $P = 0.7$ days). Given $P$ and $T_0=0$, the likelihood $\ln\mathcal{L}$ shown in (a) is phase-folded and interpolated onto a common grid of phases shown in (b). As an example, the white lines in (a) mark the edges of each fold for a period of $P=0.5$ days, and the white crosses show the epochs $\set{T_k}_{k\in\mathbb{K}}$ matching a particular phase in the grid (reported in (a) and (b)) on which the corresponding $\set{\ln \mathcal{L}_k}_{k\in\mathbb{K}}$ are interpolated and combined using \autoref{eq:comb}. To allow the use of efficient matrix computations, this is done for all durations $\set{D_i}_i$ so that $\mathcal{P}$ is computed on the full grid $\set{D_i, \phi_i}_{i, j}$ at once. We understand from the folded likelihoods plots in (b) that a different choice of epoch $T_0$ may only shift the results in phase but do not affect the values of $\mathcal{P}$. For this reason, computing $\mathcal{P}$ for $T_0=0$ is sufficient. We also notice how the maximum value of $\mathcal{P}(P=0.7/2)$ is lower than for $P=0.7$ days, a result of combining the log-likelihoods using \autoref{eq:comb} instead of \autoref{eq:attempt}, in favor of individual transits matching a common depth $\Delta$.}
         \label{fig:periodic_search}
     \end{centering}
 \end{figure}
@@ -201,16 +212,11 @@ shown for few periods in \autoref{fig:periodic_search}.b, a notation where $\Del
 
 \subsection{The transit search periodogram}
 
-
-
-
-Using \autoref{eq:comb}, we can now compute $\ln\mathcal{P}$ for a range of periods (see \autoref{fig:periodic_search}) and build a transit search periodogram using \autoref{eq:periodogram}. But a final issue emerges, one that is fundamentally linked to our strategy. Each likelihood $p(\bm{f} \vert T, D, \Delta)$ estimated during the \textit{linear search} is computed using N measurements. Hence, combining transits in the \textit{periodic search}, through $\Delta_k$, $\sigma_k$ and the product of $K$ likelihoods $\set{\mathcal{L}_k}_k$ (\autoref{eq:comb}), artificially leads to a likelihood involving $N\times K$ measurements. This lead to a normalization issue when trying to compare the joint log-likelihoods $\mathcal{P}(P)$ from one period to another (like the ones in \autoref{fig:periodic_search} that have been normalized for visualization purpose), as the number of observed transits differs from one period to another. This motivates a final step to produce the transit search periodogram $Q$.
-\\\\
-For any period P, instead of taking $ \mathcal{Q}(P)$ as the maximum value of $\ln\mathcal{P}$, we retrieve the maximum likekihood parameters
+Using \autoref{eq:comb}, we can now compute $\ln\mathcal{P}$ for a range of periods and build a transit search periodogram using \autoref{eq:periodogram}. But a final issue emerges, one that is fundamentally linked to our strategy. Each likelihood $p(\bm{f} \vert T, D, \Delta)$ estimated during the \textit{linear search} is computed using N measurements. Hence, combining transits in the \textit{periodic search}, through $\Delta_k$, $\sigma_k$ and the product of $K$ likelihoods $\set{\mathcal{L}_k}_k$ (\autoref{eq:comb}), artificially leads to a likelihood involving $N\times K$ measurements. This lead to a normalization issue when trying to compare the joint log-likelihoods $\mathcal{P}(P)$ from one period to another (like the ones in \autoref{fig:periodic_search} that have been normalized for visualization purpose), as the number of observed transits differs from one period to another. This motivates a final step to produce the transit search periodogram $Q$. For any period P, instead of taking $ \mathcal{Q}(P)$ as the maximum value of $\ln\mathcal{P}$, we retrieve the maximum likekihood parameters
 \begin{equation}\label{eq:phi0}
     (\phi_0 ,D) = \argmax_{\phi_i, D_j} \set{\ln p(\bm{f} \vert P, \phi_i, D_j)}_{i, j}
 \end{equation}
-and define $\mathcal{Q}(P)$ as the SNR of the transit of period $P$, epoch $T_0 = \phi_0 P$ duration $D$ and depth $\Delta$, i.e.
+and define $\mathcal{Q}(P)$ as the SNR of the transit of period $P$, epoch $T_0 = \phi_0 P$, duration $D$ and depth $\Delta$, i.e.
 $$
     \mathcal{Q}(P) = \frac{\Delta}{\sigma}
 $$
@@ -220,23 +226,23 @@ where $\Delta$ and $\sigma$ are obtained using \autoref{eq:comb} with the last c
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=0.8\linewidth]{../figures/principle_Q.pdf}
-        \caption{}
+        \caption{\TODO}
         \label{fig:periodogram}
     \end{centering}
 \end{figure}
 
-The periodic transit of period $P$ with the maximum SNR, i.e. maximizing $\mathcal{Q}$, is adopted as the best candidate, adapting our confidence through the minimum SNR for which we consider a signal to be real. The parameters of this transit are the period $P$, the epoch $T_0 = \phi_0 P$ and duration $D$ (\autoref{eq:phi0}), and the depth $\Delta$ with error $\sigma$ (\autoref{eq:comb}).
+The periodic transit of period $P$ with the maximum SNR, i.e. maximizing $\mathcal{Q}$, is adopted as the best candidate, basing our confidence in this signal through its SNR. The parameters of this transit are the period $P$, the epoch $T_0 = \phi_0 P$ and duration $D$ (\autoref{eq:phi0}), and the depth $\Delta$ with error $\sigma$ (\autoref{eq:comb}).
 
 \newpage
-\subsubsection{An open-source python package}
-
+\subsection{An open-source python package}
+\TODO
 
 \section{Injection-recovery on simulated data}\label{simu}
-
+\TODO
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[height=12cm]{../../workflows/synthetic_injection_recovery/figures/final_result.pdf}
-        \caption{}
+        \caption{\TODO}
         \label{fig:simu}
     \end{centering}
 \end{figure}
@@ -273,7 +279,7 @@ The mean $\bm{\mu}$ is built such that $\mu_i = \mathcal{T}(t_i) + \mathcal{S}(t
 \end{figure}
 In what follows, we describe the models used to simulate the components of the signal $f$, i.e. the periodic transit $\mathcal{T}$, the instrumental systematics $\mathcal{S}$ and the covariance function $\nu$ describing stellar variability and white noise.
 
-\subsection{Transit signal $\mathcal{T}$}
+\subsection{Transit signal $\mathcal{T}$}\label{app_proto}
 We simulate the periodic transit signal $\mathcal{T}$ using the simple model described in \cite{protopapas} where a transit of period $P$, epoch $T_0$, duration $D$ and unitary depth observed at time $t$ is given by
 \begin{equation}
     \begin{gathered}
@@ -303,7 +309,7 @@ $$
 $$
 where the vector $\bm{w}$ are linear coefficients of the model. The simulated flux shown in \autoref{fig:app_principle_dataset} contains a linear model where the $M=4$ columns of the design matrix $\bm{X}$ are given by $\bm{X}_{i} = \bm{t}^i$ (i.e. $\bm{X}$ is the Vandermonde matrix order $3$ of time $t$) and $\bm{w} = [1.0\quad0.0005\quad\text{-}0.0002\quad\text{-}0.0005].$
 
-\subsection{Stellar variability $\nu$} 
+\subsection{Stellar variability $\nu$}\label{app_gp}
 We simulate correlated noise thanks to Gaussian Processes. In our study, we are particularly interested in stellar variability and its effect on transit detection. For this reason, we use a physically-motivated kernel, describing the covariance of a stochastically-driven damped harmonic oscillator (SHO, \cite{, celerite, celerite2}) taking the form 
 
 \begin{equation}
@@ -353,7 +359,9 @@ where $G$ is the probability density function of $\mathcal{N}(\Delta, \sigma^2)$
     p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i \right)  \int G_k(\tilde\Delta)\, G(\tilde\Delta)\, d\tilde\Delta
 \end{equation}
 The product of two normal distributions is also a normal distribution, so that the integral in \autoref{eq:ice_int} can be obtained analytically. We have
-$$p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i  \right) \frac{1}{\sqrt{2\pi \left(\sigma^{2} + \sigma_{k}^{2}\right)}} e^{- \frac{1}{2}\frac{\left(\Delta -  \Delta_{k}\right)^{2}}{\sigma^{2} + \sigma_{k}^{2}}}$$
+\begin{proof}{gaussians_product_integral}
+    p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i  \right) \frac{1}{\sqrt{2\pi \left(\sigma^{2} + \sigma_{k}^{2}\right)}} e^{- \frac{1}{2}\frac{\left(\Delta -  \Delta_{k}\right)^{2}}{\sigma^{2} + \sigma_{k}^{2}}}
+\end{proof}
 And \autoref{eq:goal} gives 
 \begin{equation}\label{eq:result}
     \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{K}{2}\ln(2\pi) - \frac{1}{2}\sum_k^K \left( \frac{\left(\Delta_{k} -

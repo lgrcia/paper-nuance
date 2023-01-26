@@ -22,6 +22,8 @@ simple/latex/*
 !simple/latex/*.cls
 !simple/latex/*.bst
 !simple/latex/*.pdf
+!simple/latex/cortex.tex
+!simple/latex/gitlinks.tex
 .vscode
 
 # workflows
