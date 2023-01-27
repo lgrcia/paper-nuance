@@ -1,29 +1,20 @@
-# Snakemake and showyourwork temporaries
+# Sankemake temporary
 **/.snakemake
-**/.showyourwork*
-
-# Showyourwork output files
-/*.pdf
-report.html
-arxiv.tar.gz
-
-# Figure output
-src/tex/figures/*
 
 # Miscellaneous
 __pycache__
 *.synctex.gz
 *.ipynb_checkpoints*
 
-# lgrcia
-simple/latex/*
-!simple/latex/ms.tex
-!simple/latex/bib.bib
-!simple/latex/*.cls
-!simple/latex/*.bst
-!simple/latex/*.pdf
-!simple/latex/cortex.tex
-!simple/latex/gitlinks.tex
+# latex
+latex/*
+!latex/ms.tex
+!latex/bib.bib
+!latex/*.cls
+!latex/*.bst
+!latex/*.pdf
+!latex/cortex.tex
+!latex/gitlinks.tex
 .vscode
 
 # workflows

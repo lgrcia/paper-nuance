@@ -49,11 +49,18 @@
 \title{\texttt{nuance}: Detection of planetary transits in the presence of correlated noise}
 
 % Authors list
-\author{Lionel J. Garcia, Daniel Foreman-Mackey, Fran Pozuelos}
+\author{Lionel J. Garcia}
+\affiliation{Astrobiology Research Unit, Universit\'{e} de Li\`{e}ge, All\'{e}e du 6 Ao\^{u}t 19C, B-4000 Li\`{e}ge, Belgium}
+\author{Daniel Foreman-Mackey}
+\affiliation{Center for Computational Astrophysics, Flatiron Institute, New York, NY, USA}
+\author{Francisco J. Pozuelos}
+
+\correspondingauthor{Lionel J. Garcia}
+\email{lionel\_garcia@live.fr}
 
 % Abstract with filler text
 \begin{abstract}
-    We present \nuance{}, an algorithm to search for planetary transits in light curves featuring correlated noise, such as instrumental signals and stellar photometric variability. To deal with these nuisance signals, a common approach consist in cleaning a light curve from correlated noise before searching for transits. However, we show that this approach, based on an incomplete modelling of light curves, strongly degrades transit signals, up to the point of no detection. As this degradation depends on the noise characteristics, we explore the parameter space for which it occurs, and quantify its effect on a wide variety of cases. We show that \nuance{} outperforms the detection capabilities of commonly used transit search algorithms, especially for light curves featuring correlated noise with an amplitude three times greater than the searched transit depth. We perform our tests by injecting transits on synthetic light curves, and on known TESS candidates light curves to assess the performance of our algorithm on realistic multi-planetary systems datasets. Beyond its detection efficiency, we make \nuance{} tractable, \TODO{} times faster than current alternatives based on brute force detrending, and available as a well documented open-source Python package.
+    We present \nuance{}, an algorithm to search for planetary transits in light curves featuring correlated noise, such as instrumental signals and stellar photometric variability. To deal with these nuisance signals, a common approach consist in cleaning a light curve from correlated noise before searching for transits. However, we show that this approach, based on the prior assumption that transits are not present, strongly degrades their signals, up to the point of no detection. As this degradation depends on the correlated noise characteristics, we explore the parameter space for which transits are altered, and quantify this effect on a wide variety of cases. We show that \nuance{} outperforms the detection capabilities of commonly used transit search algorithms, especially for light curves featuring correlated noise with an amplitude three times greater than the searched transit depth. We perform our tests by injecting transits on synthetic light curves, and on known TESS candidates light curves to assess the performance of our algorithm on realistic multi-planetary systems datasets. Beyond its detection efficiency, we make \nuance{} tractable, \TODO{} times faster than current alternatives based on brute force detrending, and available as a well documented open-source Python package.
 \end{abstract}
 
 % Main body with filler text
@@ -129,7 +136,7 @@ As a direct consequence, these same starspots are more likely to be occulted by 
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[height=9cm]{../../workflows/cleaning_snr/figures/simu1/result.pdf}
+        \includegraphics[height=9cm]{../workflows/cleaning_snr/figures/simu1/result.pdf}
         \caption{\TODO{}, and redo plot with top arrows and fix $tau_v$ $delta_v$}
         \label{fig:snr_detrend}
     \end{centering}
@@ -307,7 +314,7 @@ About these results, we note these transit searches were done in a particularly 
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[height=12cm]{../../workflows/synthetic_injection_recovery/figures/final_result.pdf}
+        \includegraphics[height=12cm]{../workflows/synthetic_injection_recovery/figures/final_result.pdf}
         \caption{\TODO}
         \label{fig:simu}
     \end{centering}
@@ -316,10 +323,12 @@ About these results, we note these transit searches were done in a particularly 
 \subsection{Comparison with \texttt{Sherlock} on TOI-540 real light curves}\label{real}
 
 \section{Performances and limitations}\label{perf}
+\TODO
 
 \section{Conclusion}
-
-This simulated dataset constits in a light curve featuring a transit signal of depth $1$\%, duration $0.05$ days and period $1.3$ days using the simple \citealt{protopapas} analytical model. It also contains a simulated variability signal drawn from a Gaussian Process with a quasiseparable 
+\TODO
+\\\\
+We would like to thank Julien De Wit and Prajwal Niraula for meaningful discussions at the begining of the project, Germain Garcia for his useful insights about numerical optimization, and Michaël Gillon for his overall support. Co-author Daniel Foreman-Mackey helped in shaping the mathematical formalism of our method and introduced the use of \texttt{JAX} for its tractable implementation. Co-author Francisco J. Pozuelos was key in validating \texttt{nuance} on real datasets.
 
 \newpage
 \appendix
