@@ -217,12 +217,13 @@ $$
 This is the joint likelihood of transits belonging to the same periodic signal but with varying depths  $\set{\Delta_k}_k$. However, individual transits from a periodic signal cannot be considered independent, and should instead share a common transit depth $\Delta$. We show in \autoref{combining_transits} that there is an analytical expression for the joint likelihood of K individual transits with depths and errors $\set{\Delta_k, \sigma_k}_k$ assuming a common depth $\Delta$:
 \begin{equation}\label{eq:comb}
     \begin{gathered}
-        \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{K}{2}\ln(2\pi) - \frac{1}{2}\sum_k^K \left( \frac{\left(\Delta_{k} -
-        \bar\Delta\right)^{2}}{\sigma_k^{2} + \sigma^{2}} + \ln{\left(\sigma_k^{2} + \sigma^{2} \right)} \right) \\
+        \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{1}{2} \sum_k^K\left(\ln(\sigma_{k}^2) - \ln(\sigma^{2} + \sigma_{k}^{2}) +  \frac{\left(\Delta_{k} -
+        \Delta\right)^{2}}{\sigma_k^{2} + \sigma^{2}}\right) \\
         \text{with} \quad  \frac{1}{\sigma^2} = \sum_k^K \frac{1}{\sigma_k^2} \quad \text{and} \quad
         \Delta = \sigma^2 \sum_k^K {\frac{\Delta_k}{\sigma_k^2}}
     \end{gathered}
 \end{equation}
+
 While this gives a solution for \autoref{eq:goal}, the individual epochs matching $T_0$ and $P$ are not necessarily available in the grid of epochs $\set{T_k}_k$. In \cite{foreman2016} a similar issue is solved by using the nearest neighbors in the epochs grid. Instead, to allow the efficient matrix computation of \autoref{eq:comb}, we interpolate the likelihood grid from $\set{T_i}_i$ to a common grid of transit phases $\set{\phi_i}_i$, leading to the \textit{periodic search} log-likelihood
 $$\ln\mathcal{P}(P) = \set{\ln p(\bm{f} \vert P, \phi, D)}_{i,j}$$
 shown for few periods in \autoref{fig:periodic_search}.b. In the latter equation, $\Delta_{i,j}$ is omitted since being interpolated from the \textit{linear search} using $\phi_i$, $D_j$ and $T_0 = 0$.
