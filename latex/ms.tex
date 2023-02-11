@@ -77,7 +77,7 @@ We present \nuance, an algorithm using linear models and Gaussian processes to s
 \section{The issue with correlated noise and its detrending}\label{issues}
 Two sources of correlated noise particularly justify the need for a detrending step before searching for transits: instrumental noises (such as telescope pointing errors) and stellar variability (induced by pulsations or starspots). In this section, we discuss the impact of such correlated noise and its detrending on transits detectability.
 
-\subsection{The effect  of correlated noise on transits detectability}
+\subsection{The effect of correlated noise on transits detectability}
 
 To study transits detectability, we will focus on the signal-to-noise (SNR) of a unique event, reduced to the simplified expression (\citealt{pont2006}, Equation 12):
 \begin{equation}\label{eq:snr}
@@ -180,7 +180,7 @@ with mean $\bm{wX}$ (i.e. a linear model of the M explanatory variables with coe
     \ln p(\bm{f} \vert I) = -\frac{1}{2}(\bm{f}-\bm{wX})^T\bm{\Sigma}^{-1}(\bm{f}-\bm{wX}) -  \frac{1}{2}\vert\bm{\Sigma}\vert - \frac{N}{2}\ln 2
 \end{equation}
 and can be computed on a grid of epochs and durations, the transit depth being linearly solved for any $(T, D)$. This \textit{linear search} lead to the set of likelihoods\footnote{This notation omits the vector $\bm{w}_{i,j}$ (except its last value $\Delta_{i,j}$) as it is linearly solved for any given value of $(T_i, F_j)$ and irrelevant in what follows.}
-$$\ln\mathcal{L} = \{\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})\}_{i, j}$$
+$$\set{\ln\mathcal{L}_{i,j}}_{i, j} = \set{\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})}_{i, j}$$
 were $\Delta_{i,j}$ is the depth linearly solved for a given $(T_i, D_j)$. \autoref{fig:linear_search} shows this likelihood grid computed for the simulated dataset shown in \autoref{fig:principle_dataset}, using the same Gaussian Process and design matrix $\bm{X}$ used to simulate the data (see \autoref{app_gp}).
 
 \begin{figure}[H]
@@ -417,33 +417,33 @@ i.e., given a depth $D$, the likelihood of our data given a periodic transit sig
 \end{equation}
 where $p(\bm{f} \vert T_k, D, \tilde\Delta)$ is the probability of the $k$-th transit to have a depth $\tilde\Delta$ and $p(\tilde\Delta | \Delta)$ the probability to observe the depth $\tilde\Delta$ knowing the existence of a common depth $\Delta$. In other words, \autoref{eq:non_part_of_per} involves the likelihood of the non-periodic transit $k$ to be part of a periodic transit signal with a common depth $\Delta$.
 \\\\
-Since each depth $\Delta_k$ is found through generalized least square, each follow a normal distribution $\mathcal{N}(\Delta_k, \sigma_k^2)$, centered on $\Delta_k$ with variance $\sigma_k^2$, and with an amplitude $\mathcal{L}_k$, leading to the likelihood:
-$$p(\bm{f} \vert T_k, D, \tilde\Delta) = \mathcal{L}_k G_k(\tilde\Delta)$$
-where $G_k$ is the probability density function of $\mathcal{N}(\Delta_k, \sigma_k^2)$. 
+Since each depth $\Delta_k$ is found through generalized least square, each follow a normal distribution $\mathcal{N}(\Delta_k, \sigma_k^2)$, centered on $\Delta_k$ with variance $\sigma_k^2$, and with an amplitude $\mathcal{L}_k$, leading to the likelihood function:
+$$p(\bm{f} \vert T_k, D, \tilde\Delta) = \mathcal{L}_k\exp \left(-\frac{(\tilde\Delta-\Delta_k)^2}{2\sigma_k^2}\right)$$
 \\\\
 As for the common transit depth $\Delta$, it can be estimated through the joint probability of all other transit depths than $\Delta_k$, such that
-$$\Delta \sim \prod_{\sumTk}^K \mathcal{N}(\Delta_i, \sigma_i^2) \quad\text{i.e.}\quad \Delta \sim \mathcal{N}(\Delta, \sigma^2) $$
-a normal distribution defined by
+$$\Delta \sim \prod_{\sumTk}^K \mathcal{N}(\Delta_i, \sigma_i^2)$$
+with 
 \begin{equation}\label{eq:params}
-\frac{1}{\sigma^2} = \sum_{\sumTk}^K \frac{1}{\sigma_i^2} \quad \text{and} \quad
+\frac{1}{\sigma^2} = \sum_{\sumTk}^K \frac{1}{\sigma_i^2} \hspace{0.5cm} \text{and} \hspace{0.5cm}
 \Delta =\sigma^2 \sum_{\sumTk}^K {\frac{\Delta_i}{\sigma_i^2}}
 \end{equation}
-$$p(\tilde\Delta | \Delta) =  \left(\prod_{\sumTk}^K \mathcal{L}_i \right) G(\tilde\Delta)$$
-where $G$ is the probability density function of $\mathcal{N}(\Delta, \sigma^2)$. We can now rewrite \autoref{eq:non_part_of_per} as
+Hence
+$$p(\tilde\Delta | \Delta) = \frac{1}{\sqrt{2\pi\sigma^2}}x\exp \left(-\frac{(\tilde\Delta-\Delta)^2}{2\sigma^2}\right)$$
+We can now rewrite \autoref{eq:non_part_of_per} as
 \begin{equation}\label{eq:ice_int}
-    p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i \right)  \int G_k(\tilde\Delta)\, G(\tilde\Delta)\, d\tilde\Delta
+    p(\bm{f} \vert T_k, D, \Delta) =  \frac{\mathcal{L}_k}{\sqrt{2\pi\sigma^2}} \int \exp\left(-\frac{(\tilde\Delta-\Delta_k)^2}{2\sigma_k^2}\right)\, \exp\left(-\frac{(\tilde\Delta-\Delta)^2}{2\sigma^2}\right)\, d\tilde\Delta
 \end{equation}
-The product of two normal distributions is also a normal distribution, so that the integral in \autoref{eq:ice_int} can be obtained analytically. We have
+The integral in \autoref{eq:ice_int} is a product of gaussian integrals that can be obtained analytically and we have
 \begin{proof}{gaussians_product_integral}
-    p(\bm{f} \vert T_k, D, \Delta) =   \mathcal{L}_k \left(\prod_{\sumTk}^K \mathcal{L}_i  \right) \frac{1}{\sqrt{2\pi \left(\sigma^{2} + \sigma_{k}^{2}\right)}} e^{- \frac{1}{2}\frac{\left(\Delta -  \Delta_{k}\right)^{2}}{\sigma^{2} + \sigma_{k}^{2}}}
+    p(\bm{f} \vert T_k, D, \Delta) = \mathcal{L}_k  \sqrt{\frac{2\pi\sigma_{k}^2}{\sigma^{2} + \sigma_{k}^{2}}} \exp\left(-\frac{1}{2}\frac{(\Delta_k-\Delta)^2}{\sigma_k^2 + \sigma^2}\right)
 \end{proof}
 And \autoref{eq:goal} gives 
 \begin{equation}\label{eq:result}
-    \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{K}{2}\ln(2\pi) - \frac{1}{2}\sum_k^K \left( \frac{\left(\Delta_{k} -
-    \Delta\right)^{2}}{\sigma_k^{2} + \sigma^{2}} + \ln{\left(\sigma_k^{2} + \sigma^{2} \right)} \right)
+    \ln p(\bm{f} \vert P, T_0 ,D, \Delta) =  \sum_{k}^K \ln \mathcal{L}_k  - \frac{1}{2} \sum_k^K\left(\ln(2\pi\sigma_{k}^2) + \ln(\sigma^{2} + \sigma_{k}^{2}) +  \frac{\left(\Delta_{k} -
+    \Delta\right)^{2}}{\sigma_k^{2} + \sigma^{2}}\right)
 \end{equation}
 the log-likelihood of our data given a periodic transit signal of period $P$, epoch $T_0$, duration $D$ and common depth $\Delta$. In order to reduce the number of times \autoref{eq:params} is computed, we adopt the biased estimates
-$$\frac{1}{\sigma^2} = \sum_{k}^K \frac{1}{\sigma_i^2} \quad \text{and} \quad \Delta  = \sigma^2 \sum_{k}^K {\frac{\Delta_i}{\sigma_i^2}}$$
+$$\frac{1}{\sigma^2} = \sum_{k}^K \frac{1}{\sigma_i^2} \hspace{0.5cm}\text{and}\hspace{0.5cm} \Delta  = \sigma^2 \sum_{k}^K {\frac{\Delta_i}{\sigma_i^2}}$$
 so that $\Delta$ and $\sigma$ are independent of $k$ in the last sum of \autoref{eq:result}.
 
 \bibliography{bib}
