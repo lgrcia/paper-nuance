@@ -21,5 +21,8 @@ latex/*
 workflows/**/data/**/*.yaml
 workflows/**/data/**/*.npy
 
+workflows/toi540_injection_recovery/data/lightcurves
+
 
 **/.DS_Store
+**npy

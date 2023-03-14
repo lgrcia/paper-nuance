@@ -1,13 +1,14 @@
 
 lcs, = glob_wildcards("data/lightcurves/{lc}.csv")
-print(lcs)
+
+rule all:
+    input: [f"data/results/{lc}.yaml" for lc in lcs]
 
 rule optimize_gp:
-    input: 
-    output: "data/gp.yaml"
+    input: "data/lightcurves/P1.4736842105263157_R1.92_1411.8866757062847.csv"
+    output: protected("data/gp.yaml")
     conda: "envs/base.yaml"
     script: "scripts/gp.py"
-
 
 rule search:
     input: "data/gp.yaml", "data/lightcurves/{lc}.csv"
