@@ -2,9 +2,10 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
+  - pip
   - python <= 3.10
   - jax
   - numpy
   - pandas
   - pip:
-    - -e /Users/lgrcia/code/nuance
+    - -e /Users/lgrcia/code/dev/nuance

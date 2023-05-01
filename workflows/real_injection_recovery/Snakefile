@@ -1,0 +1,22 @@
+configfile: "config.yaml"
+
+# targets TICs
+targets = [140212114, 27734884, 306331621, 452793374, 29923559] # add 29923559
+idxs = range(config["n"]**2)
+
+# rule all:
+#     # input: "data/140212114/search_results.png", 29923559
+#     # input: "data/140212114/search_results.png", "data/27734884/search_results.png"
+#     #[f"data/29923559/nuance_search/{lc}.yaml" for lc in idxs], [f"data/29923559/tls_search/{lc}.yaml" for lc in idxs]
+#     input: [f"figures/{tic}/{tic}_cleaned_lc.pdf" for tic in (140212114, 29923559)]
+
+rule all:
+    input:
+        #["data/306331621/search_results.csv"],
+        # "/Users/lgrcia/papers/phd-thesis/figures/nuance/452793374_cleaned_lc.pdf"
+        [f"/Users/lgrcia/papers/phd-thesis/figures/nuance/{tic}_cleaned_lc.pdf" for tic in targets],
+        [f"/Users/lgrcia/papers/phd-thesis/figures/nuance/{tic}_search_comparison.pdf" for tic in targets]
+
+
+include: "search.smk"
+include: "plots.smk"

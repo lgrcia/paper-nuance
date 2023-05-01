@@ -5,7 +5,7 @@ rule all:
     input: [f"data/results/{lc}.yaml" for lc in lcs]
 
 rule optimize_gp:
-    input: "data/lightcurves/P1.4736842105263157_R1.92_1411.8866757062847.csv"
+    input: "data/lightcurves/P10.0_R0.51_1415.9042195659338.csv"
     output: protected("data/gp.yaml")
     conda: "envs/base.yaml"
     script: "scripts/gp.py"

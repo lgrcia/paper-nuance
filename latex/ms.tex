@@ -113,14 +113,14 @@ In \autoref{fig:issue2}, we simulate a light curve featuring a single transit in
 \\\\
 \autoref{fig:issue2} clearly shows the effect of both detrending techniques on transits SNR, and suggests that this degradation is strongly dependant on the stellar variability characteristics encountered. In order to explore the parameter space for which detrending is the most problematic, we simulate light curves including a single transit and a much wider range of correlated noise characteristics defined with two parameters: $\tau$ the relative timescale of the variability with respect to the transit duration; and $\delta$, the relative amplitude of the variability against transit depth, such that:
 \begin{equation}\label{eq:relative_param_space}
-    \tau \propto \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}} \quad \text{and} \quad 
-    \delta \propto \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}} 
+    \tau \propto \frac{\mathrm{variability\; timescale}}{\mathrm{transit\;duration}} \hspace{0.5cm} \text{and} \hspace{0.5cm} 
+    \delta \propto \frac{\mathrm{variability\; amplitude}}{\mathrm{transit\;depth}}.
 \end{equation}
 To follow this parametrization, we simulate the photometric variability using a GP with an SHO kernel with hyperparameters \footnote{}:
 \begin{equation}\label{eq:relative_params}
-    \omega = \frac{\pi}{\tau D} \quad 
-    \sigma = \delta \frac{\Delta}{2} \quad  \text{and}  \quad  
-    Q = 10
+    \omega = \frac{\pi}{\tau D}, \hspace{0.5cm} 
+    \sigma = \delta \frac{\Delta}{2} \hspace{0.5cm}  \text{and}  \hspace{0.5cm}  
+    Q = 10,
 \end{equation}
 with $\Delta$ and $D$ the depth and duration of the simulated transit, similar in all light curves. 
 % We fix a relatively high value for the quality factor $Q$ in order to restrict our simulations to strongly periodic variability signals. 
@@ -290,15 +290,13 @@ Finally, the \textit{periodic search} is run with
 From this \texttt{search} object, the best transiting candidate parameters can be computed (\texttt{search.best}), or the $\mathcal{Q}$ periodogram retrieved (\texttt{search.Q\_snr}), together with valuable information about the transit search. The \texttt{Nuance} object also provides methods to perform transit search on light curves from multi-planetary systems, the advantage of \texttt{nuance} being that the \textit{linear search} only needs to be performed ones, and reused for the search of several transiting candidates. An extensive and maintained online documentation is provided at \href{https://nuance.readthedocs.io}{\texttt{nuance.readthedocs.io}}.
 
 \newpage
-\section{Validation with injection-recovery}\label{simu}
+\section{Validation on simulated light curves}\label{simu}
 In order to validate our algorithm, we assess the transit search capabilities of \texttt{nuance} against commonly used techniques. As demonstrated in \autoref{detrending_effect}, the full-fledged modeling offered by \texttt{nuance} is not always necessary, and becomes beneficial for particular noise characteristics that are relative to the searched transit parameters. Hence, our comparison will be done on the relative parameter space $(\tau, \delta)$ described in \autoref{eq:relative_param_space}, focusing on its formulation by assuming correlated noise in the form of stellar variability (\autoref{eq:relative_params}) simulated using a Gaussian Process with an SHO kernel (\autoref{app_gp}). Ultimately, we demonstrate in this section how \texttt{nuance} compares with commonly used techniques, depending on the similarity between stellar variability and the searched transit signals.
 \\\\
 In what follows, we inject transits in simulated or real datasets, and employ algorithms to recover these transits with the right parameters (hence \textit{injection-recovery}). We consider the transit to be found if the absolute difference between the periods $dP$ and epochs $dT_0$ of the recovered and injected planets follow
 $$dP<0.1\;\text{days} \hspace{0.5cm} \text{and} \hspace{0.5cm} dT_0<0.01\;\text{days}$$ 
 
 \newcommand{\wtls}{\texttt{wõtan+TLS}}
-
-\subsection{Comparison with \wtls{} on a simulated light curves}
 
 We start by comparing \texttt{naunce} to a relatively simple method on simulated light curves. As in \autoref{detrending_effect}, this simple method consist in searching for planetary transits by first modeling stellar variability using an optimal biweight filter (implemented in \texttt{wõtan} \citep{wotan} using a window size three times that of the injected transit duration), subtracting it from the light-curve, and then perform the search on the detrended light curve using an optimal box-least-square algorithm (\texttt{TLS}, \citealt{tls}). We name this method \wtls{}.
 \\\\
@@ -310,7 +308,7 @@ where $\mathcal{U}(a, b)$ denotes a uniform distribution of lower bound $a$ and 
 \\\\
 The results of these injection-recovery are shown in \autoref{fig:simu} and highlight particularly well the benefit of \nuance{} against \wtls{} on transits corresponding to $\delta > 3$ and $\tau > 2$, i.e. with relatively low transit depth compared to the stellar variability amplitude, and a relatively small duration compared to the stellar variability period. On average, searching a single light curve with \nuance{} took 9 seconds, compared to 8 seconds with \wtls{}. Beyond its increased sensitivity, this metric demonstrates the tractability of \nuance{}, studied in more details in \autoref{}.
 \\\\
-About these results, we note these transit searches were done in a particularly optimal setup, on light curves not all physically realistic, hence demonstrating the performance of \nuance{} on a theoretical basis only. In the next subsection, we perform transits injection-recovery on a real dataset, using more realistic tools and on light curves featuring known planetary transits, hence validating \nuance{} on a realistic multi-planetary dataset.
+About these results, we note these transit searches were done in a particularly optimal setup, on light curves not all physically realistic, hence demonstrating the performance of \nuance{} on a theoretical basis only. In the next section, we perform transits injection-recovery on a real dataset, using more realistic tools and on light curves featuring known planetary transits, hence validating \nuance{} on a realistic multi-planetary dataset.
 
 
 \begin{figure}[H]
@@ -320,6 +318,13 @@ About these results, we note these transit searches were done in a particularly 
         \label{fig:simu}
     \end{centering}
 \end{figure}
+
+\section{Validation on real TESS light curves}\label{real}
+
+The parameter space ($\tau$, $\delta$) presented in is convenient from a signal analysis standpoint, but does not easily translate into physical cases. In order to assess the performance of \texttt{nuance} on real light curves, we rather evaluate its transit recovery capabilities in the planetary (period, radius) parameter space, more often encountered in the literature (e.g. ).
+
+
+
 
 \subsection{Comparison with \texttt{Sherlock} on TOI-540 real light curves}\label{real}
 

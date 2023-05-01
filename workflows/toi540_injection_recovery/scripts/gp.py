@@ -55,7 +55,7 @@ for i in range(3):
     optimize, mu, plot_kernel = nu.gp_optimization(utils.build_gp, mask=mask)
     new_params = optimize(new_params, ["log_sigma", "log_jitter"])
     new_params = optimize(new_params, ["log_quality", "log_sigma", "log_jitter"])
-    new_params = optimize(new_params)
+    # we do not optimize for the period as it is found independently
 
 # Saving
 
