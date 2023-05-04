@@ -1,0 +1,5 @@
+n: 4000
+duration: 0.04
+depth: 0.01
+period: 1.1
+error: 0.001

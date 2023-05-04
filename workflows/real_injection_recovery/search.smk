@@ -1,32 +1,41 @@
 rule download:
-    output: "data/{target}/lc.fluxes"
+    output: 
+        fluxes = "data/{target}/original.fluxes",
+        info = "data/{target}/info.yaml"
     priority: 0
     conda: "envs/base.yaml"
     script: "scripts/download.py"
 
 rule optimize_gp:
-    input: "data/{target}/lc.fluxes"
+    input: 
+        fluxes = "data/{target}/original.fluxes",
+        info = "data/{target}/info.yaml"
     output: "data/{target}/gp.yaml"
     priority: 1
     conda: "envs/base.yaml"
     script: "scripts/optimize_gp.py"
 
-rule clean_flares:
-    input: "data/{target}/lc.fluxes", "data/{target}/gp.yaml"
-    output: "data/{target}/cleaned_lc.fluxes"
+rule clean:
+    input:
+        fluxes = "data/{target}/original.fluxes",
+        info = "data/{target}/info.yaml",
+        gp = "data/{target}/gp.yaml"
+    output: "data/{target}/cleaned.fluxes"
     priority: 2
     conda: "envs/base.yaml"
-    script: "scripts/clean_flares.py"
+    script: "scripts/clean.py"
 
 rule periods:
-    input: "data/{target}/cleaned_lc.fluxes"
+    input: "data/{target}/info.yaml"
     output: "data/{target}/periods.npy"
     priority: 3
     conda: "envs/base.yaml"
     script: "scripts/periods.py"
 
 rule params:
-    input: "data/{target}/cleaned_lc.fluxes"
+    input:
+        fluxes = "data/{target}/cleaned.fluxes",
+        info = "data/{target}/info.yaml",
     output: "data/{target}/params.values"
     params:
         n=config["n"]
@@ -35,31 +44,66 @@ rule params:
     script: "scripts/params.py"
 
 rule inject:
-    input: "data/{target}/cleaned_lc.fluxes", "data/{target}/params.values"
+    input:
+        fluxes = "data/{target}/cleaned.fluxes",
+        info = "data/{target}/info.yaml",
+        params = "data/{target}/params.values"
     output: "data/{target}/injected/{lc}.fluxes"
     priority: 4
     conda: "envs/base.yaml"
     script: "scripts/inject.py"
 
 rule tls_search:
-    input: "data/{target}/injected/{lc}.fluxes", "data/{target}/periods.npy"
-    output: "data/{target}/tls_search/{lc}.yaml"
+    input:
+        fluxes = "data/{target}/injected/{lc}.fluxes",
+        info = "data/{target}/info.yaml",
+        periods = "data/{target}/periods.npy"
+    output:
+        wotan3D = "data/{target}/recovered/wotan3D/{lc}.params",
+        harmonics = "data/{target}/recovered/harmonics/{lc}.params",
     priority: 5
     conda: "envs/base.yaml"
     script: "scripts/tls_search.py"
 
+rule bspline_tls:
+    input:
+        fluxes = "data/{target}/injected/{lc}.fluxes",
+        info = "data/{target}/info.yaml",
+        periods = "data/{target}/periods.npy"
+    output: "data/{target}/recovered/bspline/{lc}.params"
+    priority: 5
+    conda: "envs/base.yaml"
+    script: "scripts/bspline_tls.py"
+
+rule bls:
+    input:
+        fluxes = "data/{target}/injected/{lc}.fluxes",
+        info = "data/{target}/info.yaml",
+        periods = "data/{target}/periods.npy"
+    output:
+        wotan3D = "data/{target}/recovered/bls_wotan3D/{lc}.params",
+        harmonics = "data/{target}/recovered/bls_harmonics/{lc}.params",
+        bspline = "data/{target}/recovered/bls_bspline/{lc}.params",
+    priority: 5
+    conda: "envs/base.yaml"
+    script: "scripts/bls.py"
+
 rule nuance_search:
-    input: "data/{target}/injected/{lc}.fluxes", "data/{target}/gp.yaml", "data/{target}/periods.npy"
-    output: "data/{target}/nuance_search/{lc}.yaml"
+    input: 
+        fluxes = "data/{target}/injected/{lc}.fluxes",
+        info = "data/{target}/info.yaml",
+        periods = "data/{target}/periods.npy",
+        gp = "data/{target}/gp.yaml"
+    output: "data/{target}/recovered/nuance/{lc}.params"
     priority: 6
     conda: "envs/base.yaml"
     script: "scripts/nuance_search.py"
 
 rule concatenate:
     input: 
-        nuance = [f"data/{{target}}/nuance_search/{lc}.yaml" for lc in idxs],
-        tls = [f"data/{{target}}/tls_search/{lc}.yaml" for lc in idxs]
-    output: "data/{target}/search_results.csv"
+        recovered = [f"data/{{target}}/recovered/{{tool}}/{lc}.params" for lc in idxs],
+        injected = [f"data/{{target}}/injected/{lc}.fluxes" for lc in idxs],
+    output: "data/{target}/recovered/{tool}/results.csv"
     priority: 7
     conda: "envs/base.yaml"
     script: "scripts/concatenate.py"

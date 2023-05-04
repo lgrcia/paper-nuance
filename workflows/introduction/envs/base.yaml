@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python <= 3.10
+  - jax
+  - numpy
+  - pandas
+  - matplotlib
+  - pip:
+    - -e /Users/lgrcia/code/nuance

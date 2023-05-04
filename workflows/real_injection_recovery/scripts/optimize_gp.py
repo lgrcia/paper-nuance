@@ -6,8 +6,8 @@ import yaml
 from nuance import Nuance
 from nuance.kernels import rotation
 
-input = snakemake.input[0]
-data = pickle.load(open(input, "rb"))
+data = pickle.load(open(snakemake.input.fluxes, "rb"))
+info = yaml.safe_load(open(snakemake.input.info, "r"))
 
 # only one continuous segment
 dt = np.diff(data["time"])
@@ -21,7 +21,7 @@ data["flux"] = data["flux"][mask]
 data["time"] = data["time"][mask]
 data["error"] = data["error"][mask]
 
-build_gp, init = rotation(data["star_period"], np.mean(data["error"]), long_scale=0.5)
+build_gp, init = rotation(info["star_period"], np.mean(data["error"]), long_scale=0.5)
 nu = Nuance(data["time"], data["flux"], data["error"])
 optimize, mu, nll = nu.gp_optimization(build_gp)
 

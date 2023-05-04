@@ -1,0 +1,22 @@
+
+N_POINTS = [1000, 5000, 10000, 20000, 50000, 100000, 200000]
+N_X = [1, 2, 3, 6, 8, 10]
+period_range = [0.5, 100]
+
+
+rule all: 
+    input: 
+        expand("data/lightcurves/{n_points}_1.npy" , n_points=N_POINTS)
+
+rule make_lightcurve:
+    output: 'data/lightcurves/{n_points}_{n_X}.npy'
+    conda: "envs/base.yaml"
+    script: 'scripts/make_lightcurve.py'
+
+rule tls:
+    input: 'data/lightcurves/{n_points}_{n_X}.npy'
+    output: "benchmarks/tls/{n_points}_{n_X}_{n_periods}.csv"
+    params: period_range=period_range
+    conda: "envs/base.yaml"
+    benchmark: "benchmarks/tls/{n_points}_{n_X}_{n_periods}.csv"
+    script: 'scripts/tls_search.py'

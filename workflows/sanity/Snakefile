@@ -1,0 +1,78 @@
+
+configfile: "config.yaml"
+
+idxs = range(config["n"]**2)
+methods = ["tls", "bls", "nuance"]
+
+rule all:
+    input: 
+        "figures/control_test.pdf",
+        "data/params_check.yaml"
+
+rule lightcurve:
+    output: 'data/lightcurve.npy'
+    conda: 'envs/base.yaml'
+    script: 'scripts/lightcurve.py'
+
+rule params:
+    input: 'data/lightcurve.npy'
+    output: 'data/params.npy'
+    conda: 'envs/base.yaml'
+    script: 'scripts/params.py'
+
+rule inject:
+    input: 
+        params = 'data/params.npy',
+        lc = 'data/lightcurve.npy',
+    output: 'data/injected/{i}.npy'
+    conda: 'envs/base.yaml'
+    script: 'scripts/inject.py'
+
+rule tls_search:
+    input: 
+        params = 'data/params.npy',
+        lc = 'data/lightcurve.npy',
+        injected = 'data/injected/{i}.npy'
+    output: 'data/results/tls/{i}.yaml'
+    conda: 'envs/base.yaml'
+    script: 'scripts/tls_search.py'
+
+rule nuance_search:
+    input: 
+        params = 'data/params.npy',
+        lc = 'data/lightcurve.npy',
+        injected = 'data/injected/{i}.npy'
+    output: 'data/results/nuance/{i}.yaml'
+    conda: 'envs/base.yaml'
+    script: 'scripts/nuance_search.py'
+
+rule bls_search:
+    input: 
+        params = 'data/params.npy',
+        lc = 'data/lightcurve.npy',
+        injected = 'data/injected/{i}.npy'
+    output: 'data/results/bls/{i}.yaml'
+    conda: 'envs/base.yaml'
+    script: 'scripts/bls_search.py'
+
+rule params_check:
+    input: 'data/params.npy'
+    output: 'data/params_check.yaml'
+    run: 
+        import yaml 
+        import numpy as np
+        periods, depths = np.load(input[0]).T
+        with open(output[0], 'w') as f:
+            yaml.safe_dump({
+                "periods": [float(periods.min()), float(periods.max())],
+                "depths": [float(depths.min()), float(depths.max())]
+            }, open(output[0], 'w'))
+
+rule plot:
+    input: 
+        tls = [f"data/results/tls/{i}.yaml" for i in idxs],
+        bls = [f"data/results/bls/{i}.yaml" for i in idxs],
+        nuance = [f"data/results/nuance/{i}.yaml" for i in idxs]
+    output: 'figures/control_test.pdf'
+    conda: 'envs/base.yaml'
+    script: 'scripts/plot.py'

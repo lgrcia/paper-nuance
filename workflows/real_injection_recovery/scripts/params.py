@@ -1,17 +1,18 @@
 import pickle
 
 import numpy as np
+import yaml
 from nuance.star import Star
 
-input = snakemake.input[0]
-data = pickle.load(open(input, "rb"))
+info = yaml.safe_load(open(snakemake.input.info, "r"))
+data = pickle.load(open(snakemake.input.fluxes, "rb"))
 n = snakemake.params["n"]
 
 star = Star(
-    data["star_radius"], data["star_mass"], data["star_amplitude"], data["star_period"]
+    info["star_radius"], info["star_mass"], info["star_amplitude"], info["star_period"]
 )
 
-min_period = 0.2
+min_period = 0.4
 max_period = 10.0
 max_snr = 30.0
 min_snr = 4.0
@@ -19,7 +20,6 @@ min_snr = 4.0
 
 dt = np.median(np.diff(data["time"]))
 sigma = np.mean(data["error"])
-radii = np.linspace(0.1, 50, 100000)
 N = len(data["time"])
 
 max_radius = star.min_radius(max_period, max_snr, N, sigma)

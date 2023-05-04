@@ -1,13 +1,11 @@
-import pickle
-
 import numpy as np
+import yaml
 from nuance.utils import clean_periods
 
-lc_file = snakemake.input[0]
-data = pickle.load(open(lc_file, "rb"))
+info = yaml.safe_load(open(snakemake.input[0], "r"))
 
-periods = np.linspace(0.1, 11.0, 10000)
-periods = clean_periods(periods, data["star_period"])
+periods = np.linspace(0.3, 11.0, 8000)
+periods = clean_periods(periods, info["star_period"])
 
 output = snakemake.output[0]
 np.save(output, periods)

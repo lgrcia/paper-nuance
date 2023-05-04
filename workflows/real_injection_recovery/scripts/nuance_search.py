@@ -5,11 +5,12 @@ import yaml
 from nuance import Nuance
 from nuance.kernels import rotation
 
-lc_file, gp_file, periods_file = snakemake.input
-periods = np.load(periods_file)
-data = pickle.load(open(lc_file, "rb"))
-gp_params = yaml.full_load(open(gp_file, "r"))
-build_gp, _ = rotation(data["star_period"])
+gp_params = yaml.full_load(open(snakemake.input.gp, "r"))
+data = pickle.load(open(snakemake.input.fluxes, "rb"))
+periods = np.load(snakemake.input.periods)
+info = yaml.safe_load(open(snakemake.input.info, "r"))
+
+build_gp, _ = rotation(info["star_period"])
 gp = build_gp(gp_params, data["time"])
 
 nu = Nuance(data["time"], data["flux"], gp=gp)
@@ -19,11 +20,8 @@ nu.linear_search(data["time"], np.array([0.01, data["transit_duration"]]))
 search = nu.periodic_search(periods)
 
 output = snakemake.output[0]
-result = data.copy()
-del result["flux"]
-del result["error"]
-del result["time"]
-result.update(dict(zip(["found_t0", "found_duration", "found_period"], search.best)))
-yaml.safe_dump(
-    {name: float(value) for name, value in result.items()}, open(output, "w")
+t0, _, period = search.best
+pickle.dump(
+    {"t0": t0, "period": period, "power": search.Q_snr, "trend": None},
+    open(snakemake.output[0], "wb"),
 )

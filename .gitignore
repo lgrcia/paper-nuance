@@ -20,12 +20,10 @@ latex/*
 # workflows
 workflows/**/data/**/*.yaml
 workflows/**/data/**/*.npy
-
-workflows/toi540_injection_recovery/data/lightcurves
-workflows/real_injection_recovery*/data/**/*.npy
-workflows/real_injection_recovery*/data/**/*.yaml
-workflows/real_injection_recovery*/data/**/*.params
-workflows/real_injection_recovery*/data/**/*.fluxes
+workflows/**/data/**/*.pkl
+workflows/**/data/**/*.fluxes
+workflows/**/data/**/*.params
+workflows/**/data/lightcurves
 
 
 **/.DS_Store

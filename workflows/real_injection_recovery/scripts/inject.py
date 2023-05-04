@@ -1,16 +1,17 @@
 import pickle
 
 import numpy as np
+import yaml
 from nuance.star import Star
 from nuance.utils import periodic_transit
 
 i = int(snakemake.wildcards.lc)
-data_path, params_path = snakemake.input
-data = pickle.load(open(data_path, "rb"))
-periods, radii = pickle.load(open(params_path, "rb"))
+data = pickle.load(open(snakemake.input.fluxes, "rb"))
+periods, radii = pickle.load(open(snakemake.input.params, "rb"))
+info = yaml.safe_load(open(snakemake.input.info, "r"))
 
 star = Star(
-    data["star_radius"], data["star_mass"], data["star_amplitude"], data["star_period"]
+    info["star_radius"], info["star_mass"], info["star_amplitude"], info["star_period"]
 )
 
 np.random.seed(i)

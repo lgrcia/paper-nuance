@@ -1,6 +1,7 @@
+import pickle
+
 import numpy as np
 import pandas as pd
-import yaml
 
 
 def right_candidate(t0, period, true_t0, true_period, verbose=False):
@@ -26,27 +27,29 @@ def right_candidate(t0, period, true_t0, true_period, verbose=False):
         return same
 
 
-def get_result(f, tool):
-    d = yaml.safe_load(open(f, "r"))
+def get_result(injected_file, recovered_file):
+    injected = pickle.load(open(injected_file, "rb"))
+    recovered = pickle.load(open(recovered_file, "rb"))
+    t0, period = recovered["t0"], recovered["period"]
+    true_t0, true_period = injected["transit_t0"], injected["planet_period"]
     return {
-        f"{tool}_found_t0": d["found_t0"],
-        f"{tool}_found_period": d["found_period"],
-        f"{tool}_found": right_candidate(
-            d["found_t0"], d["found_period"], d["transit_t0"], d["planet_period"]
-        ),
-    }, d
+        "t0": t0,
+        "period": period,
+        "true_t0": true_t0,
+        "true_period": true_period,
+        "found": right_candidate(t0, period, true_t0, true_period),
+        "radius": injected["planet_radius"],
+        "tau": injected["tau"],
+        "delta": injected["delta"],
+    }
 
 
-nuance_files = snakemake.input.nuance
-tls_files = snakemake.input.tls
+recovered = snakemake.input.recovered
+injected = snakemake.input.injected
 
 results = []
 
-for i, (nuance_file, tls_file) in enumerate(zip(nuance_files, tls_files)):
-    nuance_results, injected = get_result(nuance_file, "nuance")
-    tls_results, _ = get_result(tls_file, "tls")
-    results.append({**nuance_results, **tls_results, **injected})
-
+for i, (a, b) in enumerate(zip(injected, recovered)):
+    results.append(get_result(a, b))
 results = pd.DataFrame(results)
-
 results.to_csv(snakemake.output[0], index=False)

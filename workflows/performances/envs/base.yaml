@@ -1,0 +1,15 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.8
+  - jax
+  - numpy<1.20.0
+  - pandas
+
+  - pip:
+    - -e /Users/lgrcia/code/dev/nuance
+    - wotan
+    - transitleastsquares
+    - lightkurve
