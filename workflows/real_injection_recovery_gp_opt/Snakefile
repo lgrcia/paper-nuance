@@ -1,0 +1,18 @@
+configfile: "config.yaml"
+
+
+# targets TICs
+targets = [153193474, 230741378]
+idxs = range(config["n"] ** 2)
+
+
+rule all:
+    input:
+        # [f"test/searched/{target}.pdf" for target in targets],
+        # [f"data/{target}/extra_info.yaml" for target in targets],
+        # [f"test/cleaned/{target}.pdf" for target in targets]
+        "data/153193474/recovered/nuance/results.csv",
+
+
+include: "search.smk"
+include: "plots.smk"
