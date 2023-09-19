@@ -1,0 +1,54 @@
+import pandas as pd
+
+targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14.csv").Name.values
+
+rule all:
+    input: [f"figures/{target}.png" for target in targets]
+
+
+rule download:
+    output:
+        fluxes="data/{target}/original.fluxes",
+        info="data/{target}/info.yaml",
+    conda:
+        "envs/base.yaml"
+    script:
+        "scripts/download.py"
+
+
+rule optimize_gp_to_clean:
+    input:
+        fluxes="data/{target}/original.fluxes",
+        info="data/{target}/info.yaml",
+    output:
+        "data/{target}/gp.yaml",
+    conda:
+        "envs/base.yaml"
+    script:
+        "scripts/optimize_gp.py"
+
+
+rule clean:
+    input:
+        fluxes="data/{target}/original.fluxes",
+        info="data/{target}/info.yaml",
+        gp="data/{target}/gp.yaml",
+    output:
+        "data/{target}/cleaned.fluxes",
+    conda:
+        "envs/base.yaml"
+    script:
+        "scripts/clean.py"
+
+rule plot:
+    input:
+        fluxes="data/{target}/original.fluxes",
+        info="data/{target}/info.yaml",
+        gp="data/{target}/gp.yaml",
+        cleaned="data/{target}/cleaned.fluxes",
+    output:
+        "figures/{target}.png",
+    conda:
+        "envs/base.yaml"
+    script:
+        "scripts/plot.py"

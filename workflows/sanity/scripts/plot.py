@@ -1,8 +1,9 @@
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import yaml
+from scipy.stats import binned_statistic_2d
+
+scatter = False
 
 
 def is_found(period, true_period):
@@ -12,61 +13,87 @@ def is_found(period, true_period):
     if period_check:
         return 1
     elif alias_check:
-        return 0.7
+        return 0.5
     else:
         return 0
 
 
-results_files = {
-    "TLS": snakemake.input.tls,
-    "BLS": snakemake.input.bls,
-    "nuance": snakemake.input.nuance,
-}
+df = pd.read_csv(snakemake.input[0])
 
+df["bls_found"] = df.apply(
+    lambda row: is_found(row["bls_period"], row["period"]), axis=1
+)
+df["nuance_found"] = df.apply(
+    lambda row: is_found(row["nuance_period"], row["period"]), axis=1
+)
 
-methods = ["TLS", "BLS", "nuance"]
-plt.figure(None, (7.5, 2.7))
+bins = (23, 23)
+fig = plt.figure(None, (7.5, 3.5))
+cmap = "Greys_r"
 
-for i, method in enumerate(methods):
-    ax = plt.subplot(1, len(methods), i + 1)
-    files = results_files[method]
-    results = pd.DataFrame([yaml.safe_load(open(f, "r")) for f in files])
-    results["found"] = results.apply(
-        lambda row: is_found(row["period"], row["true_period"]), axis=1
-    )
-
-    period, depth, found = results[["true_period", "true_depth", "found"]].values.T
-    period_range = [period.min(), period.max()]
-    depth_range = np.array([depth.min(), depth.max()]) * 1e4
-    # plt.scatter(period, depth, c=found, s=10, cmap="Greys_r")
-
-    ax.imshow(
-        found.reshape(20, 20),
-        extent=[*period_range, *depth_range],
-        aspect="auto",
-        cmap="Greys_r",
+ax = plt.subplot(121)
+period, depth, found = df[["period", "depth", "bls_found"]].values.T
+depth *= 1e4
+stats = binned_statistic_2d(period, depth, found, bins=bins)
+if scatter:
+    plt.scatter(period, depth, c=found, s=10, cmap=cmap)
+else:
+    im = plt.imshow(
+        stats.statistic.T,
         origin="lower",
+        extent=(
+            stats.x_edge.min(),
+            stats.x_edge.max(),
+            stats.y_edge.min(),
+            stats.y_edge.max(),
+        ),
+        aspect="auto",
+        cmap=cmap,
     )
 
-    ax.set_xlabel("period (days)")
+ax.text(
+    0.05,
+    0.92,
+    f"{len(period)} samples (binned)",
+    va="center",
+    ha="left",
+    transform=ax.transAxes,
+)
 
-    if i == 0:
-        ax.set_ylabel(r"depth ($10^{-4}$)")
+xlabel = r"period (days)"
+ax.set_xlabel(xlabel)
+ax.set_ylabel(r"depth ($10^{-4}$)")
+ax.set_title("BLS")
 
-    if method == "nuance":
-        ax.legend(
-            handles=[
-                mpatches.Patch(facecolor="w", edgecolor="0.8"),
-                mpatches.Patch(color="0.7"),
-                mpatches.Patch(color="k"),
-            ],
-            labels=["correct", "alias", "wrong"],
-            loc="upper left",
-            fontsize=10,
-            frameon=False,
-        )
+ax = plt.subplot(122)
+period, depth, found = df[["period", "depth", "nuance_found"]].values.T
+depth *= 1e4
 
-    ax.set_title(method)
+if scatter:
+    plt.scatter(period, depth, c=found, s=10, cmap=cmap)
+else:
+    stats = binned_statistic_2d(period, depth, found, bins=bins)
+    im = plt.imshow(
+        stats.statistic.T,
+        origin="lower",
+        extent=(
+            stats.x_edge.min(),
+            stats.x_edge.max(),
+            stats.y_edge.min(),
+            stats.y_edge.max(),
+        ),
+        aspect="auto",
+        cmap=cmap,
+    )
+
+ax.set_xlabel(xlabel)
+ax.set_title("nuance")
+
+axins = ax.inset_axes((1.07, 0, 0.05, 0.4))
+cb = fig.colorbar(im, cax=axins, orientation="vertical", ticks=[])
+cb.ax.text(-0.1, -0, "0%", va="center", ha="left")
+cb.ax.text(-0.1, 1.1, "100%", va="center", ha="left")
+cb.ax.text(1.3, 0.55, "recovery", va="center", ha="left", rotation=-90)
 
 plt.tight_layout()
 plt.savefig(snakemake.output[0])

@@ -1,0 +1,11 @@
+Here are the many points where I think the paper is (still?) not good (not all of these should be treated and I'd like to discuss with colleagues of what they think is critical for publication):
+- In the real injection recovery, I would like to **try out Ben's method** (maybe first contact him to see if he is ok with that! I just contacted him 20230907)
+- In the real injection recovery, what about using a **more realistic model for the light curve**? That is feasible but is that necessary? (well I am sure the community will appreciate instead of the empirical model I use)
+- I am just **rerunning more of the simple BLS comparison** to have more data point and (hopefully) see if both are more comparable (for now I see slight differences)
+- I know I can **optimize further the periodic search**, but it works now. Should I?
+- How bad should I **justify the development of a new method**? Basically the all synthetic injection recovery where for sure I could be also trying things on photometric precision parameter space
+- How exhaustive guidelines of ***"when to use prose?"*** should be? For now there is nothing and I think this is an issue. On the other there are tons of light curves characteristics to consider.
+- Is the **introduction enough**?
+- The benchmark is too weak, right?
+- In the discussion, a part on the non-optimal kernels is missing
+- Is the synthetic comparison with wotan+TLS fair?

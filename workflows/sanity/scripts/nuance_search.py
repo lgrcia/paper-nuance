@@ -4,12 +4,12 @@ from nuance import Nuance
 
 time, _, error = np.load(snakemake.input.lc)
 flux = np.load(snakemake.input.injected)
-period_range = snakemake.config["period_range"]
-n_periods = snakemake.config["n_periods"]
 duration = snakemake.config["duration"]
-params = np.load(snakemake.input.params)
-i = int(snakemake.wildcards.i)
-periods = np.linspace(-0.1 + period_range[0], 0.1 + period_range[1], n_periods)
+params = yaml.full_load(open(snakemake.input.params))
+period_range = snakemake.config["period_range"]
+periods = np.linspace(
+    -0.1 + period_range[0], 0.1 + period_range[1], snakemake.config["n_periods"]
+)
 
 # search
 # ------
@@ -22,9 +22,6 @@ yaml.safe_dump(
     {
         "t0": float(t0),
         "period": float(period),
-        "true_period": float(params[i, 0]),
-        "true_t0": float(0),
-        "true_depth": float(params[i, 1]),
     },
     open(snakemake.output[0], "w"),
 )

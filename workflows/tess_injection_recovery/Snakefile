@@ -1,0 +1,21 @@
+configfile: "config.yaml"
+
+
+# targets TICs
+targets = [153193474, 140212114, 452793374, 306331621, 291337184, 355462802, 386713079, 20297123, 33866201, 450104815, 234271852, 62397411, 326769598, 453095489, 381920488, 306359037, 100481123, 70111, 38842861, 46157102, 152875048]
+idxs = range(config["n"] ** 2)
+
+import pandas as pd
+
+all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14.csv").Name.values
+
+
+rule all:
+    input:
+        [f"figures/searched/{target}.pdf" for target in all_targets],
+        # [f"figures/cleaned/{target}.png" for target in all_targets],
+        # [f"figures/check/{target}.pdf" for target in targets],
+
+
+include: "search.smk"
+include: "plots.smk"

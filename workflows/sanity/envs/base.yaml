@@ -7,9 +7,6 @@ dependencies:
   - jax
   - numpy
   - pandas
-
+  - astropy
   - pip:
-    - -e /Users/lgrcia/code/dev/nuance
-    - wotan
-    - transitleastsquares
-    - lightkurve
+    - -e /Users/lgarcia/code/dev/nuance

@@ -8,8 +8,10 @@ __pycache__
 
 # latex
 latex/*
+!latex/paper.tex
 !latex/ms.tex
 !latex/bib.bib
+!latex/ref.bib
 !latex/*.cls
 !latex/*.bst
 !latex/*.pdf
@@ -24,6 +26,8 @@ workflows/**/data/**/*.pkl
 workflows/**/data/**/*.fluxes
 workflows/**/data/**/*.params
 workflows/**/data/lightcurves
+workflows/**/data
+workflows/tess_injection_recovery/figures
 
 
 **/.DS_Store
