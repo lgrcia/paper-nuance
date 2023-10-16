@@ -7,14 +7,15 @@ idxs = range(config["n"] ** 2)
 
 import pandas as pd
 
-all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14.csv").Name.values
+all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14-clean.csv").Name.values
 
 
 rule all:
     input:
         [f"figures/searched/{target}.pdf" for target in all_targets],
-        # [f"figures/cleaned/{target}.png" for target in all_targets],
+        [f"figures/cleaned/153193474.pdf" for target in all_targets],
         # [f"figures/check/{target}.pdf" for target in targets],
+        # [f"data/*/recovered/bls_bspline/*.params" for target in targets],
 
 
 include: "search.smk"

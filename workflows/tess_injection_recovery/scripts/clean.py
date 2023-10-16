@@ -10,6 +10,17 @@ from nuance.kernels import rotation
 i = 0
 
 data = pickle.load(open(snakemake.input.fluxes, "rb"))
+
+# splits = np.array_split(
+#     np.arange(len(data["time"])), np.flatnonzero(np.diff(data["time"]) > 0.1) + 1
+# )
+
+mask = data["time"] < data["time"].mean()
+n = 300
+data["time"] = data["time"][mask][n:-n]
+data["flux"] = data["flux"][mask][n:-n]
+data["error"] = data["error"][mask][n:-n]
+
 info = yaml.safe_load(open(snakemake.input.info, "r"))
 gp_params = yaml.full_load(open(snakemake.input.gp, "r"))
 
@@ -18,7 +29,7 @@ gp = build_gp(gp_params, data["time"])
 nu = Nuance(data["time"], data["flux"], gp=gp)
 
 
-def mask_flares(time, flux, iterations=3, sigma=4, gp=None):
+def mask_flares(time, flux, iterations=3, sigma=3, gp=None):
     _, mu, _ = nu.gp_optimization(build_gp)
 
     mask = np.ones_like(time).astype(bool)

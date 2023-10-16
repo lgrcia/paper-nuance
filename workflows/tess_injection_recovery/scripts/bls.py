@@ -11,6 +11,30 @@ from astropy.timeseries import BoxLeastSquares
 from scipy.interpolate import BSpline, splrep
 from wotan import flatten
 
+
+def bls(time, flux, error):
+    model = BoxLeastSquares(time, flux, dy=error)
+    return model.power(periods, 0.03, objective="snr")
+
+
+def save_result(trend, results, filename):
+    t0 = 0.0
+    i = np.argmax(results.power)
+    period = results.period[i]
+    power = results.power
+
+    pickle.dump(
+        {
+            "t0": t0,
+            "period": period,
+            "power": power,
+            "trend": trend,
+            "snr": power[i],
+        },
+        open(filename, "wb"),
+    )
+
+
 data = pickle.load(open(snakemake.input.fluxes, "rb"))
 periods = np.load(snakemake.input.periods)
 info = yaml.safe_load(open(snakemake.input.info, "r"))
@@ -22,23 +46,20 @@ verbose = True
 # --------
 
 flatten_trend = flatten(
-    time, flux, window_length=data["transit_duration"] * 3, return_trend=True
+    time,
+    flux,
+    window_length=data["transit_duration"] * 3,
+    return_trend=True,
+    robust=True,
 )[1]
+
 flatten_flux = flux - flatten_trend
 flatten_flux -= np.mean(flatten_flux)
 flatten_flux += 1.0
 
-model = BoxLeastSquares(time, flatten_flux, dy=error)
-results = model.power(periods, 0.03)
+results = bls(time, flatten_flux, error)
 
-t0 = 0.0
-period = results.period[np.argmax(results.power)]
-power = results.power
-
-pickle.dump(
-    {"t0": t0, "period": period, "power": power, "trend": flatten_trend},
-    open(snakemake.output.wotan3D, "wb"),
-)
+save_result(flatten_trend, results, snakemake.output.wotan3D)
 
 
 # harmonics
@@ -57,7 +78,7 @@ def make_harmonics(time, period, nharmonics=4):
     return X
 
 
-X = make_harmonics(time, info["star_period"], nharmonics=2)
+X = make_harmonics(time, info["star_period"], nharmonics=5)
 # solve for the coefficients
 coeffs = np.linalg.solve(X.T @ X, X.T @ flux)
 # make the model
@@ -66,17 +87,9 @@ flatten_flux = flux - flatten_trend
 flatten_flux -= np.mean(flatten_flux)
 flatten_flux += 1.0
 
-model = BoxLeastSquares(time, flatten_flux, dy=error)
-results = model.power(periods, 0.03)
+results = bls(time, flatten_flux, error)
 
-t0 = 0.0
-period = results.period[np.argmax(results.power)]
-power = results.power
-
-pickle.dump(
-    {"t0": t0, "period": period, "power": power, "trend": flatten_trend},
-    open(snakemake.output.harmonics, "wb"),
-)
+save_result(flatten_trend, results, snakemake.output.harmonics)
 
 # bspline
 mask = np.ones_like(data["time"], dtype=bool)
@@ -97,17 +110,9 @@ flatten_flux = flux - flatten_trend
 flatten_flux -= np.mean(flatten_flux)
 flatten_flux += 1.0
 
-model = BoxLeastSquares(time, flatten_flux, dy=error)
-results = model.power(periods, 0.03)
+results = bls(time, flatten_flux, error)
 
-t0 = 0.0
-period = results.period[np.argmax(results.power)]
-power = results.power
-
-pickle.dump(
-    {"t0": t0, "period": period, "power": power, "trend": flatten_trend},
-    open(snakemake.output.bspline, "wb"),
-)
+save_result(flatten_trend, results, snakemake.output.bspline)
 
 
 # bens
@@ -121,7 +126,7 @@ def bens_detrend(time, flux, n=5):
 
         ls = LombScargle(time, flux)
         frequency, power = ls.autopower(
-            minimum_frequency=1 / 10, maximum_frequency=1 / 0.1
+            minimum_frequency=1 / 5, maximum_frequency=1 / 0.1
         )
         period = 1 / frequency[np.argmax(power)]
         return period
@@ -153,14 +158,6 @@ def bens_detrend(time, flux, n=5):
 
 flatten_flux, flatten_trend = bens_detrend(time, flux, n=8)
 
-model = BoxLeastSquares(time, flatten_flux, dy=error)
-results = model.power(periods, 0.03)
+results = bls(time, flatten_flux, error)
 
-t0 = 0.0
-period = results.period[np.argmax(results.power)]
-power = results.power
-
-pickle.dump(
-    {"t0": t0, "period": period, "power": power, "trend": flatten_trend},
-    open(snakemake.output.bens, "wb"),
-)
+save_result(flatten_trend, results, snakemake.output.bens)

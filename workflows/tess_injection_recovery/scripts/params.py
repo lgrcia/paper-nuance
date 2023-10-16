@@ -13,16 +13,16 @@ star = Star(
 )
 
 min_period = 0.4
-max_period = 10.0
+max_period = 5.0
 max_snr = 30.0
-min_snr = 4.0
+min_snr = 2.0
 # -----
 
 dt = np.median(np.diff(data["time"]))
 sigma = np.mean(data["error"])
 N = len(data["time"])
 
-max_radius = star.min_radius(max_period, max_snr, N, sigma)
+max_radius = star.min_radius(min_period, max_snr, N, sigma)
 min_radius = star.min_radius(max_period, min_snr, N, sigma)
 
 period_radius = np.array(

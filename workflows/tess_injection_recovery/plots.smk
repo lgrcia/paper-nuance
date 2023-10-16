@@ -23,9 +23,10 @@ rule plot_lc:
     input: 
         fluxes="data/{target}/cleaned.fluxes",
         gp="data/{target}/gp.yaml",
-        info="data/{target}/info.yaml"
-    output: "figures/cleaned/{target}.png"
-    script: "scripts/plots/plot_lc.py"
+        info="data/{target}/info.yaml",
+        raw="data/{target}/original.fluxes"
+    output: "figures/cleaned/{target}.pdf"
+    script: "scripts/plot_lc.py"
 
 rule plot_comparison:
     input: 
@@ -41,13 +42,13 @@ rule plot_comparison:
         methods=methods
     script: "scripts/plot_comparison.py"
 
-rule plot_results:
-    input: 
-        results=[f"data/{{target}}/recovered/{method}/results.csv" for method in methods.keys()],
-    params:
-        methods = methods
-    output: "figures/searched/{target}.pdf"
-    script: "scripts/plot_results.py"
+# rule plot_results:
+#     input: 
+#         results=[f"data/{{target}}/recovered/{method}/results.csv" for method in methods.keys()],
+#     params:
+#         methods = methods
+#     output: "figures/searched/{target}.pdf"
+#     script: "scripts/plot_results.py"
 
 
 rule copy_figure:

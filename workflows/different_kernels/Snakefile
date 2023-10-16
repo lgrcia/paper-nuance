@@ -1,0 +1,29 @@
+targets = [1200831]
+
+rule all:
+    input:
+        expand("data/{target}/star_period.yaml", target=targets)
+
+rule download:
+    output:
+        fluxes="data/{target}/original.fluxes",
+        info="data/{target}/info.yaml",
+    script:
+        "scripts/download.py"
+
+rule star_period:
+    input:
+        "data/{target}/original.fluxes"
+    output:
+        "data/{target}/star_period.yaml",
+    script:
+        "scripts/star_period.py"
+
+rule optimize_gp_to_clean:
+    input:
+        fluxes="data/{target}/original.fluxes",
+        star_period="data/{target}/star_period.yaml",
+    output:
+        "data/{target}/gp.yaml",
+    script:
+        "scripts/optimize_gp.py"

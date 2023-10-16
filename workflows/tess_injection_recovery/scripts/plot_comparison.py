@@ -51,7 +51,7 @@ def right_candidate(t0, period, true_t0, true_period, verbose=False):
     if period_check:
         return 1
     elif alias_check:
-        return 1.0
+        return 0.5
     else:
         return 0
 

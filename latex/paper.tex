@@ -224,6 +224,14 @@ shown for few periods in \autoref{fig:periodic_search} (b). In the latter equati
 
 \subsection{The transit search periodogram}
 
+\begin{figure}[H]
+    \begin{centering}
+        \includegraphics[width=0.8\linewidth]{principle_Q.pdf}
+        \caption{For each period $P$, the joint likelihood $\mathcal{P}(P)$ is computed using \autoref{eq:result}, and the value of the maximum likelihood transit SNR retained as $\mathcal{Q}(P)$.}
+        \label{fig:periodogram}
+    \end{centering}
+\end{figure}
+
 Using \autoref{eq:result}, we can now compute $\ln\mathcal{P}$ for a range of periods and build a transit search periodogram using \autoref{eq:periodogram}. But a final issue emerges, one that is fundamentally linked to our strategy. Each likelihood $p(\bm{f} \vert T, D, \Delta)$ estimated during the linear search is computed using N measurements. Hence, combining transits in the periodic search, through $\Delta_k$, $\sigma_k$ and the product of $K$ likelihoods $\set{\mathcal{L}_k}_k$ (see \autoref{eq:result}), artificially leads to a likelihood involving $N\times K$ measurements. This lead to a normalization issue when trying to compare the joint log-likelihoods $\mathcal{P}(P)$ from one period to another, as the number of observed transits differs from one period to another. This motivates a final step to produce the transit search periodogram $\mathcal{Q}$. For any period P, instead of taking $ \mathcal{Q}(P)$ as the maximum value of $\ln\mathcal{P}$, the maximum likelihood parameters
 \begin{equation}\label{eq:phi0}
     (\phi_0 ,D) = \argmax_{\phi_i, D_j} \set{\ln p(\bm{f} \vert P, \phi_i, D_j)}_{i, j}
@@ -234,14 +242,6 @@ are retrieved, and $\mathcal{Q}(P)$ is defined as the SNR of the transit of peri
 \end{equation*}
 where $\Delta$ and $\sigma$ are obtained using \autoref{eq:sigma_delta} with the last column of $X$ containing a periodic transit signal of period $P$, epoch $T_0$, duration $D$ and depth $1$. This process and the resulting periodogram $\mathcal{Q}$ are shown in \autoref{fig:periodogram}.\\\\
 The periodic transit of period $P$ with the maximum SNR, i.e. maximizing $\mathcal{Q}$, is adopted as the best candidate, basing the confidence in this signal through its SNR. The parameters of this transit are the period $P$, the epoch $T_0 = \phi_0 P$ and duration $D$ (\autoref{eq:phi0}), and the depth $\Delta$ with error $\sigma$ (given by \autoref{eq:sigma_delta}).
-
-\begin{figure}[H]
-    \begin{centering}
-        \includegraphics[width=0.8\linewidth]{principle_Q.pdf}
-        \caption{For each period $P$, the joint likelihood $\mathcal{P}(P)$ is computed using \autoref{eq:result}, and the value of the maximum likelihood transit SNR retained as $\mathcal{Q}(P)$.}
-        \label{fig:periodogram}
-    \end{centering}
-\end{figure}
 
 \subsection{An open-source python package}
 Methods presented in this paper are made accessible through the \textsf{nuance} open-source Python package, hosted on Github\footnote{\href{https://github.com/lgrcia/nuance}{https://github.com/lgrcia/nuance}} and released on the Python Package Index (PyPI)\footlink{https://pypi.org/project/nuance/}. 
@@ -312,20 +312,45 @@ The results of this injection-recovery procedure are shown in \autoref{fig:simu}
 
 \noindent This injection-recovery is done in a particularly optimal setup, on light curves not all physically realistic and using an optimal Gaussian Process kernel, hence demonstrating the performance of \textsf{nuance} only on a purely experimental basis. In the next section, we perform transits injection-recovery on real space-based light curves.
 
-
+\newpage
 \section{Validation on TESS light curves}\label{real}
 
-The parameter space ($\tau$, $\delta$) introduced in \autoref{detrending_effect} is very convenient from a signal processing point of view, but lacks physical reality. Very low values of $\tau$ and $\delta$ often translate into non-physical exoplanets properties as well as unrealistic stellar variability, with a strong dependence on the host star properties. \\\\
-In order to assess the performance of \textsf{nuance} on real light curves, its transit recovery capabilities are rather evaluated in the planetary (period, radius) parameter space, more often encountered in the literature (e.g. Figure 12 of \citealt{Delrez2022}). In what follows, transits described by the simple model of \cite{protopapas} (see \autoref{app_proto}) are injected into light curves from the Transiting Exoplanet Survey Satellite (TESS, \citealt{tess}). We focus this proof of concept on light curves from a list of $\sim$600 M-dwarfs found to have detectable rotation signals with periods lower than one day \citep{Ramsay2020}, which lead to a parameter space justifying the use of \nuance{} (see \autoref{when}). For each of the studied target, transits are injected and recovered in the TESS 2 min cadence SPOC Simple Aperture Photometry and Pre-search Data Conditioning light curves (PDCSAP, \citealt{spoc}) on a single sector (the first being observed for each target) spanning an average of 27 days.\\\\
-In the following sections, \textsf{nuance} is compared to other transit search strategies employing the \texttt{BLS} algorithm, each time after detrending the light curves with three different techniques:
+% In order to validate 
+
+% The parameter space ($\tau$, $\delta$) introduced in \autoref{detrending_effect} is very convenient from a signal processing point of view, but lacks physical reality. Very low values of $\tau$ and $\delta$ often translate into non-physical exoplanets properties as well as unrealistic stellar variability, with a strong dependence on the host star properties. \\\\
+% In order to assess the performance of \textsf{nuance} on real light curves, its transit recovery capabilities are rather evaluated in the planetary (period, radius) parameter space, more often encountered in the literature (e.g. Figure 12 of \citealt{Delrez2022}). In what follows, transits described by the simple model of \cite{protopapas} (see \autoref{app_proto}) are 
+
+In order to assess the performance of \textsf{nuance} on real datasets, we inject and recover transits into light curves from the Transiting Exoplanet Survey Satellite (TESS, \citealt{tess}). The goal of this transit injection-recovery is to compare \textsf{nuance} to other transit search strategies, and to understand the light curves characteristics for which it becomes beneficial.\\\\
+We focus this proof of concept on light curves from a list of $\sim$438 M-dwarfs found to have detectable rotation signals with periods lower than one day \citep{Ramsay2020}, which lead to a parameter space justifying the use of \nuance{}. For each of the studied target, transits are injected and recovered in the TESS 2 min cadence SPOC Simple Aperture Photometry and Pre-search Data Conditioning light curves (PDCSAP, \citealt{spoc}) of a single sector (the first being observed for each target) spanning on average 10 days.\\\\
+In this injection-recovery tests, \textsf{nuance} is compared to other transit search strategies employing the \texttt{BLS} algorithm, for each of them after detrending the light curves with a different technique:
 \begin{itemize}
-    \item \texttt{bspline+BLS} employs a B-spline\footlink{https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.BSpline.html} detrending, fitted using the \textsf{scipy.interpolate.splrep} function\footlink{https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.splrep.html}, followed by a search with the \texttt{BLS} algorithm.
+    \item \texttt{bspline+BLS} employs a B-spline model \footlink{https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.BSpline.html} for detrending, fitted using the \textsf{scipy.interpolate.splrep} function\footlink{https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.splrep.html}, followed by a search with the \texttt{BLS} algorithm.
     \item \texttt{biweight+BLS} employs an optimal bi-weight filter implemented in the \textsf{wõtan} Python package \citep{wotan} with an optimal window size of $3\times D$ (i.e.\, three times the transit duration), followed by a search with the \texttt{BLS} algorithm.
     \item \texttt{harmonics+BLS} employs a linear harmonic detrending, where the light curve is modeled as a Fourier series including four harmonics of the stellar rotation period found by \cite{Ramsay2020}, with coefficients found through ordinary least square. This detrending is followed by a search with the \texttt{BLS} algorithm.
+    \item \texttt{iterative+BLS} iteratively detrends the light curve with a sinusoidal signal fitted to the data, each time using the dominant period of the residuals found using a lomb-scargle periodogram (5 iterations). This detrending is followed by a search with the \texttt{BLS} algorithm.
 \end{itemize}
 
+
+\subsection{Light curve cleaning and transits injection}
+
+As some of these techniques can be affected by gaps in the data, we only use continuous measurements from half a TESS sector. We assume that all methods (including nuance) are based on an incomplete model of the data that do not account for stellar flares. For this reason, the light curve of each target is cleaned using an iterative sigma clipping approach. For each iteration, points 3 times above the standard deviation of the full light curve (previously subtracted by its median) are identified. Then, the 30 adjacent points on each side of the found outliers are masked. This way, large flare signals and their expected ingress and egress are masked, using a total of 3 iterations. As PDCSAP light curves often start with a ramp-like signal, the first 300 points (as well as the last 300 points) of each continuous observation are masked. Finally, each light curve is normalized by its median value. Such a cleaned light curve is shown in \autoref{fig:cleaned} (bottom top). We note that the gaps left after sigma clipping may be problematic for some of the detrending techniques (such as \texttt{bspline+BLS}). However, adopting this flare cleaning step and analyzing light curves with few small gaps is a practice commonly found in the literature.\\\\
+
+For each light curve, transits of planets with 10 different orbital periods combined with 10 planetary radii are individually considered, for a total of 100 periodic transits injections and recovery per target. Orbital periods $P$ are sampled on a regular grid between 0.4 and 5 days, and planetary radii $R_p$ are sampled on a regular grid designed to lead a minimum transit SNR of 4 and a maximum of 30. Using \autoref{eq:snr} with $\sigma_r = 0$, the planetary radius leading to a transit with a desired SNR $s$ is given by
+\begin{equation*}
+    R_p = R_{\star}\,n^{-\frac{1}{4}} \sqrt{\sigma s}\ %\sqrt[\leftroot{0}\uproot{2}4]{n}}. 
+\end{equation*}
+with $\sigma$ equal to the mean uncertainty estimated by the SPOC pipeline, $R_\star$ the radius of the star reported by \cite{Ramsay2020} and $n$ the number of points in transit computed using a transit duration assuming a circular orbit.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../workflows/tess_injection_recovery/figures/cleaned/1019692.pdf}
+    \caption{Trimmed and cleaned single-sector light curve of the target TIC 1019692. Top plot shows how much of the data is truncated and sigma clipped, as to result in an almost continuous light curve shown in the bottom plot. On this bottom plot, the black line corresponds to the mean of one of the Gaussian Process model (whith hyperparameters optimized after each transit signal is injected).}
+    \label{fig:cleaned}
+\end{figure}
+
 \subsection{Stellar variability kernel}
-A Gaussian Process kernel with a single SHO kernel is not representative of realistic stellar variability. Instead, a mixture of two SHO kernels of period $P_\star$ and $P_\star/2$ (with $P_\star$ the rotation period of the star), being representative of a wide range of stochastic variability in stellar time series from rotation to pulsations\footlink{https://celerite2.readthedocs.io/en/latest/api/python}, is adopted, with the addition of one short scale and one long term exponential term. This full rotation kernel is expressed as
+One of the particularity of nuance is to model a light curve as a Gaussian Process. To model these TESS light curves, we employ a mixture of two SHO kernels of period $P_\star$ and $P_\star/2$ (with $P_\star$ the rotation period of the star), a model representative of a wide range of stochastic variability in stellar time series\footlink{https://celerite2.readthedocs.io/en/latest/api/python}. In order to account for additional corelated noises, we complement this kernel with a short and a long-timescale exponential term, so that the full kernel can be expressed as
 \begin{equation*}
     k = k_1 + k_2 + k_3 + k_4
 \end{equation*}
@@ -346,53 +371,26 @@ where $Q_0$ is the quality factor for the secondary oscillation, $\delta Q$ is t
 \begin{equation*}
         k(t, t')=\sigma^2\,\exp\left(-\frac{\vert t - t' \vert}{\ell}\right),
 \end{equation*}
-with $\ell$ and $\sigma$ the scale and standard deviation of the process. These are meant to model short and long timescale non-periodic correlated noise In total, the rotation kernel $k$ has 8 hyperparameters.
+with $\ell$ and $\sigma$ the scale and standard deviation of the process. These are meant to model short and long-timescale non-periodic correlated noise. In total, the rotation kernel $k$ has 8 hyperparameters.\\\\
 
+The hyperparameters of this kernel are optimized on trimmed and cleaned light curves containing the injected transits, using the \textsf{scipy.optimize.minimize}\footlink{https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html} wrapper provided by the \textsf{jaxopt} Python package, and taking advantage of the \textsf{JAX} implementation of \textsf{tinygp}. As correlated noise is expected to affect the light curve uncertainty estimates performed by SPOC, the diagonal of the full covariance matrix of the data (i.e.\,their uncertainty, assuming homoscedasticity) is held free, increasing the number of optimized parameters to 9. The optimization is performed using the \textsf{BFGS} algorithm \citep{Fletcher1987}, minimizing the negative log-likelihood of the data as expressed in \autoref{eq:linear_search_ll} (without transit), i.e.\,accounting for a linear systematic model of the data in addition of stellar variability. For simplicity, and to adopt a uniform treatment for all target light curves, a design matrix $\bm{X}$ with a single constant column is adopted, such that the systematic model only consists in a single parameter corresponding to the mean value of the differential flux (expected to be close to 1) solved linearly.
 
-\subsection{Light curve cleaning}
-As the described light curve model does not account for stellar flares, the light curve of each target is cleaned using an iterative sigma clipping approach. For each iteration, points 4 times above the standard deviation of the full light curve (previously subtracted by its median) are identified. Then, the 30 adjacent points on each side of the found outliers are masked. This way, large flare signals and their expected ingress and egress are masked, using a total of 3 iterations. As PDCSAP light curves often start with a ramp-like signal, the first 300 points (as well as the last 300 points) of each continuous observation are masked. Finally, each light curve is normalized by its median value. Such a cleaned light curve is shown in \autoref{fig:cleaned}.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\linewidth]{153193474_clean.png}
-    \caption{Cleaned single-sector light curve of the target TIC 153193474. The light curve is normalized by its median value.}
-    \label{fig:cleaned}
-\end{figure}
+\subsection{Search parameters and transit detection criteria}
+For all techniques, we only search for transits with a duration fixed to the duration of the injected transits. This is mainly done for computational efficiency and allows for a narrower comparison between \texttt{nuance} and all \texttt{BLS}-based techniques. Finally, the search is done over 4000 trial periods linearly sampled from 0.3 to 6 days. Injection-recoveries using a wider parameter space are discussed in \autoref{}.\\\\
+Like in previous sections, we consider the detection of period aliases and ignore the match between the injected and recovered transit epochs (although we visually vet that the found epochs were consistent with the ones injected for cases where the planet was considered detected). We define true positives has transit signals with an SNR greater than 5 recovered with the correct period (or an alias) and an SNR greater than 5. False positives are signals detected with an SNR greater than 5 whereas the injected signal was lower than 5.
 
-\subsection{Injected transits}
-For each target light curve, transits of planets with 10 different orbital periods combined with 10 planetary radii are individually considered, for a total of 100 periodic transits injections and recovery per target. Orbital periods $P$ are sampled on a regular grid between 0.4 and 10 days, and planetary radii $R_p$ are sampled on a regular grid designed to lead a minimum transit SNR of 4 and a maximum of 30. Using \autoref{eq:snr} with $\sigma_r = 0$, the planetary radius leading to a transit with a desired SNR $s$ is given by
-\begin{equation*}
-    R_p = R_{\star}\,n^{-\frac{1}{4}} \sqrt{\sigma s}\ %\sqrt[\leftroot{0}\uproot{2}4]{n}}. 
-\end{equation*}
-with $\sigma$ equal to the mean uncertainty estimated by the SPOC pipeline, $R_\star$ the radius of the star reported by \cite{Ramsay2020} and $n$ the number of points in transit computed using a transit duration assuming a circular orbit.
+\subsection{Results}
+\autoref{fig:onesearch} shows the injection-recovery process and result for TIC 1019692. As with this target, we find that \texttt{nuance} leads to the highest number of true positives for 89\% of all targets, and the lowest rate of false positives for 69\% of them. When considering both true positives and false negatives, \texttt{nuance} is the best option in 65\% of all cases.\\\\
+\autoref{}
 
-\subsection{Gaussian Process hyperparameters optimization}
-The hyperparameters of the employed rotation kernel are optimized on cleaned light curves containing the injected transits, using the \textsf{scipy.optimize.minimize}\footlink{https://jax.readthedocs.io/en/latest/_autosummary/jax.scipy.optimize.minimize.html} wrapper provided by the \textsf{jaxopt} Python package, taking advantage of the \textsf{JAX} implementation of \textsf{tinygp}. As correlated noise is expected to affect the light curve uncertainty estimates performed by SPOC, the diagonal of the full covariance matrix of the data (i.e.\,their uncertainty, assuming homoscedasticity) is held free, increasing the number of optimized parameters to 9. The optimization is performed using the \textsf{BFGS} algorithm \citep{Fletcher1987}, minimizing the negative log-likelihood of the data as expressed in \autoref{eq:linear_search_ll} (without transit), i.e.\,accounting for a linear systematic model of the data in addition of stellar variability. For simplicity, and to adopt a uniform treatment for all target light curves, a design matrix $\bm{X}$ with a single constant column is adopted, such that the systematic model only consists in a single parameter corresponding to the mean value of the differential flux (expected to be close to 1) solved linearly.
-
-\subsection{Detection criteria}
-Because we also consider planets recovered with half or twice the real period, we ease the detection criteria by ignoring the match of the recovered transit epoch with the real epoch. Note that a visual vetting ensured that the found epochs were consistent with the ones injected for cases where the planet was considered detected.
-
-\subsection{Injection-recovery studies}
-\subsubsection{TIC 140212114: fast sinusoidal variability}\label{140212114}
-TIC 140212114 has an effective temperature of 3595 $\pm$ 157 K\footlink{https://exofop.ipac.caltech.edu/tess/target.php?id=140212114} (M1.5-type star, \citealt{Rajpurohit2013}) with a rotation period of 0.14 days \citep{Ramsay2020}. For each technique, the left plot of \autoref{fig:140212114} shows a portion of TIC 140212114 cleaned light curve with an injected transit signal (hardly distinguishable due to correlated noise of the light curve compared to the transit depth). On these plots the black lines correspond to the trends computed for this injected light curve subtracted from it before being searched for transits. This detrending only applies to techniques other than \textsf{nuance}, where instead the black line corresponds to the mean of the Gaussian Process model. For each technique, the right plot of \autoref{fig:140212114} shows the results of the transit search for each of the 10 $\times$ 10 injected light curves, reported in the planetary (period, radius) parameter space. A black square denotes that the transit signal has not been detected, a gray square denotes a signal detected at an alias period ($P/2$ or $2P$), and a white square denotes a transit signal detected with the correct period. On the right plots of \autoref{fig:140212114}, secondary axes show the values of the injected transits in the $(\tau, \delta)$ relative parameter space.\\\\
-Results from \autoref{fig:140212114} are discussed in \autoref{tess_results}.
-
-\begin{figure}[H]
+\begin{figure}
     \begin{centering}
-        \includegraphics[width=0.8\linewidth]{140212114.pdf}
-        \caption{Results of the transits injection-recovery on TIC 140212114 single-sector light curve. Left: cleaned light curve with computed trend overplotted in black (except for \textsf{nuance} where it corresponds to the mean of the Gaussian Process model). Right: Results of the transit search where a black square denotes a transit signal not detected, gray a signal detected at an alias period ($P/2$ or $2P$), and  white a signal detected with the correct period. On the right plots, secondary axes show the $(\tau, \delta)$ relative parameter space. For each method, the upper right legend on the left plot indicates its ranking based on the percent of recovered transit signals (where a transit with an aliased period counts as being detected). The \texttt{harmonics+TLS} method is the best after \textsf{nuance}, but with 35\% less transits detected in total. 
+        \includegraphics[width=0.8\linewidth]{../workflows/tess_injection_recovery/figures/searched/1019692.pdf}
+        \caption{Results of the transits injection-recovery on TIC 1019692 half-sector light curve. Left: cleaned light curve with computed trend overplotted in black (except for \textsf{nuance} where it corresponds to the mean of the Gaussian Process model). Right: Results of the transit search where a black square denotes a transit signal not detected, gray a signal detected at an alias period ($P/2$ or $2P$), and  white a signal detected with the correct period. On the right plots, secondary axes show the $(\tau, \delta)$ relative parameter space. For each method, the upper right legend on the left plot indicates its ranking based on the percent of recovered transit signals (where a transit with an aliased period counts as being detected).
         }
-        \label{fig:140212114}
+        \label{fig:onesearch}
     \end{centering}
 \end{figure}
-
-\subsubsection*{TIC 452793374: high-amplitude red noise}
-TIC 452793374 has an effective temperature of 3377 $\pm$ 157 K\footlink{https://exofop.ipac.caltech.edu/tess/target.php?id=452793374} (M2.5-type star, \citealt{Rajpurohit2013}) with a rotation period of 0.33 days \citep{Ramsay2020}. Injection-recovery results are shown in \autoref{fig:452793374} and discussed in \autoref{tess_results}.
-
-\subsubsection*{TIC 153193474: non-sinusoidal variability}
-TIC 153193474 has an effective temperature of 3351 $\pm$ 157 K\footlink{https://exofop.ipac.caltech.edu/tess/target.php?id=27734884} (M2.5-type star, \citealt{Rajpurohit2013}) with a rotation period of 0.11 days \citep{Ramsay2020}. Injection-recovery results are shown in \autoref{fig:153193474} and discussed in \autoref{tess_results}.
-
-\subsubsection*{TIC 306331621: slow sinusoidal variability}
-TIC 306331621 has an effective temperature of 3067 $\pm$ 157 K\footlink{https://exofop.ipac.caltech.edu/tess/target.php?id=306331621} (M5-type star, \citealt{Rajpurohit2013}) with a rotation period of 1.00 days \citep{Ramsay2020}. It was chosen for its relatively slow rotation (compared to the three other targets) and higher white noise compared to the amplitude of its variability. Injection-recovery results are shown in \autoref{fig:306331621} and discussed in \autoref{tess_results}.
 
 \subsection{Results}\label{tess_results}
 
@@ -424,6 +422,9 @@ Finally, targets with non-sinusoidal or short scale variability are the ones tha
         \label{fig:306331621}
     \end{centering}
 \end{figure}
+
+\newpage
+\section{Extensive comparison on TIC ...}
 
 \newpage
 \section{Discussion}\label{perf}

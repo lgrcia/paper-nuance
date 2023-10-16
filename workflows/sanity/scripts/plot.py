@@ -29,7 +29,7 @@ df["nuance_found"] = df.apply(
 
 bins = (23, 23)
 fig = plt.figure(None, (7.5, 3.5))
-cmap = "Greys_r"
+cmap = "viridis"
 
 ax = plt.subplot(121)
 period, depth, found = df[["period", "depth", "bls_found"]].values.T

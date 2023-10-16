@@ -32,7 +32,7 @@ def get_result(injected_file, recovered_file, fresh_file):
     injected = pickle.load(open(injected_file, "rb"))
     recovered = pickle.load(open(recovered_file, "rb"))
     fresh = yaml.safe_load(open(fresh_file, "r"))
-    t0, period = recovered["t0"], recovered["period"]
+    t0, period, snr = recovered["t0"], recovered["period"], recovered["snr"]
     true_t0, true_period = injected["transit_t0"], injected["planet_period"]
     return {
         "t0": t0,
@@ -44,6 +44,7 @@ def get_result(injected_file, recovered_file, fresh_file):
         "tau": injected["tau"],
         "delta": injected["delta"],
         "fresh_snr": fresh["snr"],
+        "snr": snr,
     }
 
 

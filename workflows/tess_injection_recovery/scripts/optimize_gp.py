@@ -9,9 +9,11 @@ from nuance.kernels import rotation
 data = pickle.load(open(snakemake.input.fluxes, "rb"))
 info = yaml.safe_load(open(snakemake.input.info, "r"))
 
-# only one continuous segment
+# only one continuous segment (removed later so commented)
 dt = np.diff(data["time"])
-mask = data["time"] < data["time"][np.flatnonzero(dt > 0.5)[0]]
+mask = np.ones_like(
+    data["time"], dtype=bool
+)  # < data["time"][np.flatnonzero(dt > 0.5)[0]]
 data["flux"] = data["flux"][mask]
 data["time"] = data["time"][mask]
 data["error"] = data["error"][mask]
