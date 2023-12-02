@@ -1,0 +1,122 @@
+from pathlib import Path
+import numpy as np
+from glob import glob
+
+targets = [
+    "TOI 540", 
+    "TIC 268914377", 
+    "TIC 39926974", 
+    "TIC 33091590", 
+    "TIC 377097547",
+    "TIC 202185707"
+]
+
+for target in targets:
+    raw_folder = Path(f"data/{target}/raw/")
+
+    if raw_folder.exists():
+        print(f"Raw data folder for {target} already exists")
+    else:
+        print(f"Creating raw data folder for {target}")
+        import lightkurve as lk
+        search_results = lk.search_lightcurve(target, author="SPOC", exptime=120)
+        if len(search_results) > 0:
+            raw_folder.mkdir(parents=True, exist_ok=True)
+        else:
+            continue
+        lk_light_curves = search_results.download_all()
+
+        for lc in lk_light_curves:
+            # clean nans
+            time = lc.time.to_value("btjd")
+            flux = lc.pdcsap_flux.to_value().filled(np.nan)
+            error = lc.flux_err.to_value().filled(np.nan)
+            mask = np.isnan(flux) | np.isnan(error) | np.isnan(time)
+            time = time[~mask]
+            flux = flux[~mask]
+            error = error[~mask]
+
+            # normalize
+            flux_median = np.median(flux)
+            flux /= flux_median
+            error /= flux_median
+
+            # save data
+            np.save(raw_folder / f"{lc.sector}.npy", np.array([time, flux, error]))
+
+
+periods = np.linspace(0.5, 10, 20000)
+durations = np.linspace(15 / 60 / 24, 1.5 / 24, 10)
+
+def sectors(target):
+    return [Path(f).stem for f in glob(f"data/{target}/raw/*.npy")]
+
+# rule all:
+#     input: 
+#         [f"figures/{target}/periodograms.pdf" for target in targets],
+#         [f"figures/TIC 202185707/{sector}.pdf" for sector in sectors("TIC 202185707")]
+
+rule all:
+    input:
+        "figures/TOI 540/periodograms.pdf",
+        "figures/TOI 540/4.pdf"
+
+rule optimize_gp_mask_flares:
+    input: "data/{target}/raw/{sector}.npy"
+    output: "data/{target}/gp/{sector}.yaml", "data/{target}/cleaned/{sector}.npy"
+    script: "scripts/optimize_gp_mask_flares.py"
+
+rule plot_light_curve:
+    input: 
+        "data/{target}/raw/{sector}.npy",
+        "data/{target}/cleaned/{sector}.npy",
+        "data/{target}/gp/{sector}.yaml"
+    output: "figures/{target}/{sector}.pdf"
+    script: "scripts/plot_light_curve.py"
+
+rule linear_search:
+    input: "data/{target}/cleaned/{sector}.npy", "data/{target}/gp/{sector}.yaml"
+    output: "data/{target}/linear_search/{sector}.nu"
+    params: durations
+    script: "scripts/linear_search.py"
+
+def nus(wildcards):
+    return [f"data/{wildcards.target}/linear_search/{s}.nu" for s 
+        in sectors(wildcards.target)]
+
+rule perodic_search_naunce_1:
+    input: nus
+    output: 
+        "data/{target}/periodic_search/1.nuance", 
+        "data/{target}/periodic_search/1_best.npy"
+    params: periods
+    script: "scripts/periodic_search_1.py"
+
+rule biweight_bls_search:
+    input: nus
+    output: "data/{target}/periodic_search/1.bls", "data/{target}/cleaned/biweight_detrended.npy"
+    params: periods, durations
+    script: "scripts/biweight_bls_search_1.py"
+
+rule perodic_search_naunce_2:
+    input: 
+        nus=nus,
+        best="data/{target}/periodic_search/1_best.npy"
+    output: "data/{target}/periodic_search/2.nuance"
+    params: periods
+    script: "scripts/periodic_search_2.py"
+
+rule biweight_bls_search_2:
+    input: "data/{target}/cleaned/biweight_detrended.npy", "data/{target}/periodic_search/1_best.npy"
+    output: "data/{target}/periodic_search/2.bls"
+    params: periods, durations
+    script: "scripts/biweight_bls_search_2.py"
+
+rule plot_periodogram:
+    input: 
+        "data/{target}/periodic_search/1.bls",
+        "data/{target}/periodic_search/1.nuance",
+        "data/{target}/periodic_search/2.bls",
+        "data/{target}/periodic_search/2.nuance"
+    output: "figures/{target}/periodograms.pdf"
+    script: "scripts/plot_periodograms.py"

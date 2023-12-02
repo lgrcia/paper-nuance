@@ -28,7 +28,9 @@ workflows/**/data/**/*.params
 workflows/**/data/lightcurves
 workflows/**/data
 workflows/tess_injection_recovery/figures
+workflows/**/*.ipynb
 
 
 **/.DS_Store
 **npy
+*.zip
