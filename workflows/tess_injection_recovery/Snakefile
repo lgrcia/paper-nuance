@@ -12,10 +12,9 @@ all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14-clean.
 
 rule all:
     input:
-        [f"figures/searched/{target}.pdf" for target in all_targets],
-        [f"figures/cleaned/153193474.pdf" for target in all_targets],
-        # [f"figures/check/{target}.pdf" for target in targets],
-        # [f"data/*/recovered/bls_bspline/*.params" for target in targets],
+        "figures/true_and_false_positives_bars.pdf",
+        "figures/searched/1019692.pdf",
+        "figures/cleaned/1019692.pdf"
 
 
 include: "search.smk"

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 
-plt.figure(figsize=(9, 2.5))
+plt.figure(figsize=(8, 2.5))
 
 nuance = np.array([yaml.safe_load(open(f))["linear"] for f in snakemake.input.nuance])
 bls = np.array([yaml.safe_load(open(f))["biweight"] for f in snakemake.input.bls])

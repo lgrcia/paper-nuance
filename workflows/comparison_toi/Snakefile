@@ -4,11 +4,11 @@ from glob import glob
 
 targets = [
     "TOI 540", 
-    "TIC 268914377", 
-    "TIC 39926974", 
-    "TIC 33091590", 
-    "TIC 377097547",
-    "TIC 202185707"
+    # "TIC 268914377", 
+    # "TIC 39926974", 
+    # "TIC 33091590", 
+    # "TIC 377097547",
+    # "TIC 202185707"
 ]
 
 for target in targets:
@@ -50,11 +50,6 @@ durations = np.linspace(15 / 60 / 24, 1.5 / 24, 10)
 
 def sectors(target):
     return [Path(f).stem for f in glob(f"data/{target}/raw/*.npy")]
-
-# rule all:
-#     input: 
-#         [f"figures/{target}/periodograms.pdf" for target in targets],
-#         [f"figures/TIC 202185707/{sector}.pdf" for sector in sectors("TIC 202185707")]
 
 rule all:
     input:

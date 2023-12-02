@@ -28,15 +28,7 @@ n_periods = [1000, 5000, 10000, 20000, 40000]
 
 rule all: 
     input: 
-        [f"data/nuance/cores_12/periods_1_10_{p}/durations_2/{10_000}_1.yaml" for p in n_periods],
-        [f"data/bls/periods_1_10_{p}/durations_2/{10_000}_1.yaml" for p in n_periods]
-        # [f"data/bls/periods_1_10_1000/durations_2/{n_points}_1.yaml" for n_points in N_POINTS],
-        # [f"data/nuance/cores_1/periods_1_10_1000/durations_2/{n_points}_1.yaml" for n_points in N_POINTS],
-        # [f"data/nuance/cores_12/periods_1_10_1000/durations_2/{n_points}_1.yaml" for n_points in N_POINTS]
-        
-        # [f"data/bls/1_10_1000/{durations}/10000_1.yaml" for durations in durations],
-        # [f"data/nuance/1_10_1000/{durations}/10000_1.yaml" for durations in durations],
-
+        "figures/nuance_vs_bls.pdf"
 
 rule bls:
     input: 'data/lightcurves/{n_points}.npy'
