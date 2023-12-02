@@ -88,7 +88,7 @@ where $\Delta$ is the relative transit depth, $n$ is the number of points within
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=8.5cm]{issue1.pdf}
+        \includegraphics[width=8.5cm]{../workflows/plot_issues/figures/issue1.pdf}
         \caption{Illustration of the effect of correlated noise on a single transit SNR. A 1-hour transit signal of depth 1\% is generated on top of white noise (variance of $0.0015^2$) as part of a 24-hours observation with an exposure time of 1 minute (top). Then, in the bottom plot, correlated noise is added, generated using a Gaussian Process with a Matèrn-32 kernel of scale 1 hour and sigma of 0.2\%. The SNR on the right of each light curve is computed using \autoref{eq:snr}. Models used to simulate these data are provided in \autoref{signals_simulations}.}
         \label{fig:issue1}
     \end{centering}
@@ -103,7 +103,7 @@ In \autoref{fig:issue2}, we simulate a transit signal on top of which we add pho
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.85\linewidth]{issue2.pdf}
+        \includegraphics[width=1\linewidth]{../workflows/plot_issues/figures/issue2.pdf}
         \caption{(Top left) Simulated observation spanning 3 days, including a transit signal with a depth of 0.8\%, duration of 0.1 day, and measurement error of 1.5\% (using the model from \cite{protopapas} described in \autoref{app_proto}). (Left) Correlated noise in the form of stellar variability with different timescales and amplitudes added to the unique transit signal. This signal is then reconstructed using (in purple) Tukey's bi-weight filter \citep{wotan} with an optimal window size of three times the transit duration, and (in red) a Gaussian Process with the same kernel used to simulate the data. In each case the variability is reconstructed, subtracted, and the transit SNR computed using \autoref{eq:snr} with the transit depth estimated as the minimum in-transit flux.}
         \label{fig:issue2}
     \end{centering}
@@ -170,7 +170,7 @@ were $\Delta_{i,j}$ is the depth linearly solved for a given $(T_i, D_j)$\footno
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.8\linewidth]{principle_linear_search.pdf}
+        \includegraphics[width=0.85\linewidth]{../workflows/principle/figures/principle_linear_search.pdf}
         \caption{Principle and output of the \textit{linear search}. The simulated dataset (top) corresponds to the one shown and described in \autoref{fig:app_principle_dataset}. First, a set of durations and depths $\set{T_i, D_j}_{i,j}$ is generated. For each pair of indices $(i,j)$, the likelihood $\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})$ is computed using the parameters from \autoref{eq:ls} and the expression of \autoref{eq:linear_search_ll}. This process yields the grid of log-likelihoods $\ln\mathcal{L}$ (bottom plot), as well as the $\set{\Delta_{i,j}, \sigma_{i,j}}_{i, j}$ transit depths and errors inferred linearly using \autoref{eq:ls}.}
         \label{fig:linear_search}
     \end{centering}
@@ -212,11 +212,11 @@ shown for few periods in \autoref{fig:periodic_search} (b). In the latter equati
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{principle_periodic_0.pdf}\\
+    \includegraphics[width=0.85\linewidth]{../workflows/principle/figures/principle_periodic_0.pdf}\\
     {(a) $\ln \mathcal{L}$}
 
     \centering
-    \includegraphics[width=0.8\linewidth]{principle_periodic_1.pdf}\\
+    \includegraphics[width=0.85\linewidth]{../workflows/principle/figures/principle_periodic_1.pdf}\\
     {(b) $\mathcal{P}(P)$}
 \end{figure}
 
@@ -229,7 +229,7 @@ shown for few periods in \autoref{fig:periodic_search} (b). In the latter equati
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.8\linewidth]{principle_Q.pdf}
+        \includegraphics[width=0.85\linewidth]{principle_Q.pdf}
         \caption{For each period $P$, the joint likelihood $\mathcal{P}(P)$ is computed using \autoref{eq:result}, and the value of the maximum likelihood transit SNR retained as $\mathcal{Q}(P)$.}
         \label{fig:periodogram}
     \end{centering}
