@@ -229,7 +229,7 @@ shown for few periods in \autoref{fig:periodic_search} (b). In the latter equati
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.85\linewidth]{principle_Q.pdf}
+        \includegraphics[width=0.85\linewidth]{../workflows/principle/figures/principle_Q.pdf}
         \caption{For each period $P$, the joint likelihood $\mathcal{P}(P)$ is computed using \autoref{eq:result}, and the value of the maximum likelihood transit SNR retained as $\mathcal{Q}(P)$.}
         \label{fig:periodogram}
     \end{centering}
@@ -471,7 +471,7 @@ When using \nuancecode{} on TESS light curves for example, it must be noted that
 In order to study the effect of correlated noise on transit search, this paper relies on transit light curve simulations including realistic effects of stellar variability and instrumental signals. The following describes how such signals are modeled.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.75\linewidth]{principle_dataset_decomposed.pdf}
+        \includegraphics[width=0.75\linewidth]{../workflows/principle/figures/principle_dataset_decomposed.pdf}
         \caption{Example dataset sampled at $N=2880$ times corresponding to an observation of 4 days with an exposure time of 2 minutes. The mean of this signal consists in a periodic transit signal of period $P=0.7$ days, duration $D=0.05$ days and depth of 2\% ($\mathcal{T}$ in gray) plus instrumental signals ($\mathcal{S}$ in blue). Correlated noise in the form of stellar variability is simulated by modeling the covariance matrix of the signal with a Gaussian process ($\mathcal{V}$ in red) including a diagonal variance of $0.001^2$ corresponding to white noise ($\epsilon$ in light grey). This simulated signal is not intended to be physically realistic.}
         \label{fig:app_principle_dataset}
     \end{centering}
@@ -493,7 +493,7 @@ The periodic transit signal $\mathcal{T}$ is simulated using the simple model de
 where the dimensionless parameter $c$ controls the roundness of the transit depth ($c\gg1$ corresponding to a box-shaped transit as shown in \autoref{fig:protopapas}). This analytical model is fully empirical but easily differentiable.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{protopapas.pdf}
+        \includegraphics[width=\linewidth]{../workflows/principle/figures/protopapas.pdf}
         \caption{Simulations of a single transit signal (\autoref{eq:protopapas}) shown for different values of $c$.}
         \label{fig:protopapas}
     \end{centering}
