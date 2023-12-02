@@ -1,2 +1,0 @@
-# Get processed data from remote
-rsync -az --exclude "*.yaml" --exclude "*.npy" exotic@$ava:"/home/exotic/code/paper-nuance/workflows/synthetic_injection_recovery/data" new_data

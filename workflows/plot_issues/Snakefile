@@ -1,0 +1,12 @@
+rule all:
+    input:
+        "figures/issue1.pdf",
+        "figures/issue2.pdf"
+
+rule plot_issue1:
+    output: "figures/issue1.pdf"
+    script: "scripts/plot_issue_1.py"
+
+rule plot_issue2:
+    output: "figures/issue2.pdf"
+    script: "scripts/plot_issue_2.py"

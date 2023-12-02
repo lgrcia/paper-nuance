@@ -1,0 +1,59 @@
+
+configfile: "config.yaml"
+
+idxs = range(config["n"])
+
+rule all:
+    input: 
+        "figures/control_test.pdf", 
+
+rule lightcurve:
+    output: 'data/lightcurve.npy'
+    script: 'scripts/lightcurve.py'
+
+rule compute_depth:
+    input: 'data/lightcurve.npy'
+    output: 'data/depths_range.yaml'
+    script: 'scripts/compute_depth.py' 
+
+rule params:
+    input: 'data/lightcurve.npy', 'data/depths_range.yaml'
+    output: 'data/params/{i}.yaml'
+    script: 'scripts/params.py'
+
+rule inject:
+    input: 
+        params = 'data/params/{i}.yaml',
+        lc = 'data/lightcurve.npy',
+    output: 'data/injected/{i}.npy'
+    script: 'scripts/inject.py'
+
+rule nuance_search:
+    input: 
+        params = 'data/params/{i}.yaml',
+        lc = 'data/lightcurve.npy',
+        injected = 'data/injected/{i}.npy'
+    output: 'data/results/nuance/{i}.yaml'
+    script: 'scripts/nuance_search.py'
+
+rule bls_search:
+    input: 
+        params = 'data/params/{i}.yaml',
+        lc = 'data/lightcurve.npy',
+        injected = 'data/injected/{i}.npy'
+    output: 'data/results/bls/{i}.yaml'
+    script: 'scripts/bls_search.py'
+
+rule concat:
+    input: 
+        params = [f"data/params/{i}.yaml" for i in idxs],
+        bls = [f"data/results/bls/{i}.yaml" for i in idxs],
+        nuance = [f"data/results/nuance/{i}.yaml" for i in idxs]
+    output: 'data/results.csv'
+    
+    script: 'scripts/concat.py'
+
+rule plot:
+    input: 'data/results.csv'
+    output: 'figures/control_test.pdf'
+    script: 'scripts/plot.py'

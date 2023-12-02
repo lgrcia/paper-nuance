@@ -1,2 +1,2 @@
 # redo plot
-snakemake -c1 --use-conda figures/simu1/result.pdf -f
+snakemake -c1 --use-conda figures/result.pdf -f

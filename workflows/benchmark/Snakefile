@@ -1,0 +1,57 @@
+
+import numpy as np
+from pathlib import Path
+
+N_POINTS = [500, 1000, 2500, 5000, 10000, 20000, 30000, 50000, 75000, 100000, 150000, 200000]
+N_X = [1, 2, 3, 6, 8, 10]
+
+lc_folder = Path("data/lightcurves")
+lc_folder.mkdir(exist_ok=True, parents=True)
+
+for n_points in N_POINTS:
+    filename = lc_folder / Path(f"{n_points}_1.npy")
+    if not filename.exists():
+        np.random.seed(n_points)
+        time = np.linspace(0, 3, n_points)
+        flux = np.random.normal(1.0, 0.01, size=len(time))
+        error = np.ones_like(time) * 0.0001
+
+        np.save(
+            filename,
+            np.array([time, flux, error]),
+        )
+
+
+periods = [1, 10, 1000]
+durations = [2, 4, 10, 15, 20, 30]
+n_periods = [1000, 5000, 10000, 20000, 40000]
+
+rule all: 
+    input: 
+        [f"data/nuance/cores_12/periods_1_10_{p}/durations_2/{10_000}_1.yaml" for p in n_periods],
+        [f"data/bls/periods_1_10_{p}/durations_2/{10_000}_1.yaml" for p in n_periods]
+        # [f"data/bls/periods_1_10_1000/durations_2/{n_points}_1.yaml" for n_points in N_POINTS],
+        # [f"data/nuance/cores_1/periods_1_10_1000/durations_2/{n_points}_1.yaml" for n_points in N_POINTS],
+        # [f"data/nuance/cores_12/periods_1_10_1000/durations_2/{n_points}_1.yaml" for n_points in N_POINTS]
+        
+        # [f"data/bls/1_10_1000/{durations}/10000_1.yaml" for durations in durations],
+        # [f"data/nuance/1_10_1000/{durations}/10000_1.yaml" for durations in durations],
+
+
+rule bls:
+    input: 'data/lightcurves/{n_points}.npy'
+    output: "data/bls/periods_{periods}/durations_{durations}/{n_points}.yaml"
+    script: 'scripts/bls.py'
+
+rule nuance:
+    input: 'data/lightcurves/{n_points}.npy'
+    output: "data/nuance/cores_{cores}/periods_{periods}/durations_{durations}/{n_points}.yaml"
+    script: 'scripts/nuance.py'
+
+rule plot:
+    input:
+        nuance = [f"data/nuance/cores_12/periods_1_10_1000/durations_2/{n}_1.yaml" for n in N_POINTS],
+        bls = [f"data/bls/periods_1_10_1000/durations_2/{n}_1.yaml" for n in N_POINTS]
+    params: points = N_POINTS
+    output: "figures/nuance_vs_bls.pdf"
+    script: 'scripts/plot.py'
