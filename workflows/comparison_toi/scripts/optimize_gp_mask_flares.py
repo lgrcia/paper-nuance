@@ -8,7 +8,7 @@ time, flux, error = np.load(snakemake.input[0])
 
 def rotation_period(time, flux):
     """rotation period based on LS periodogram"""
-    from astropy.stats import LombScargle
+    from astropy.timeseries import LombScargle
 
     ls = LombScargle(time, flux)
     frequency, power = ls.autopower(minimum_frequency=1 / 5, maximum_frequency=1 / 0.1)

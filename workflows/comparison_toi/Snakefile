@@ -71,7 +71,7 @@ rule plot_light_curve:
 
 rule linear_search:
     input: "data/{target}/cleaned/{sector}.npy", "data/{target}/gp/{sector}.yaml"
-    output: "data/{target}/linear_search/{sector}.nu"
+    output: "data/{target}/linear_search/{sector}.nu", "results/{target}/linear_search/{sector}.bls.time"
     params: durations
     script: "scripts/linear_search.py"
 
@@ -83,13 +83,14 @@ rule perodic_search_naunce_1:
     input: nus
     output: 
         "data/{target}/periodic_search/1.nuance", 
-        "data/{target}/periodic_search/1_best.npy"
+        "data/{target}/periodic_search/1_best.npy",
+        "results/{target}/periodic_search/1.nuance.time"
     params: periods
     script: "scripts/periodic_search_1.py"
 
 rule biweight_bls_search:
     input: nus
-    output: "data/{target}/periodic_search/1.bls", "data/{target}/cleaned/biweight_detrended.npy"
+    output: "data/{target}/periodic_search/1.bls", "data/{target}/cleaned/biweight_detrended.npy", "results/{target}/periodic_search/1.bls.time"
     params: periods, durations
     script: "scripts/biweight_bls_search_1.py"
 
@@ -103,7 +104,7 @@ rule perodic_search_naunce_2:
 
 rule biweight_bls_search_2:
     input: "data/{target}/cleaned/biweight_detrended.npy", "data/{target}/periodic_search/1_best.npy"
-    output: "data/{target}/periodic_search/2.bls"
+    output: "data/{target}/periodic_search/2.bls", "results/{target}/periodic_search/2.bls.time"
     params: periods, durations
     script: "scripts/biweight_bls_search_2.py"
 
