@@ -88,7 +88,7 @@ where $\Delta$ is the relative transit depth, $n$ is the number of points within
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.65\linewidth]{../workflows/plot_issues/figures/issue1.pdf}
+        \includegraphics[width=0.6\linewidth]{../workflows/plot_issues/figures/issue1.pdf}
         \caption{Illustration of the effect of correlated noise on a single transit SNR. A 1-hour transit signal of depth 1\% is generated on top of white noise (variance of $0.0015^2$) as part of a 24-hours observation with an exposure time of 1 minute (top). Then, in the bottom plot, correlated noise is added, generated using a Gaussian Process with a Matèrn-32 kernel of scale 1 hour and sigma of 0.2\%. The SNR on the right of each light curve is computed using \autoref{eq:snr}. Models used to simulate these data are provided in \autoref{signals_simulations}.}
         \label{fig:issue1}
     \end{centering}
@@ -301,7 +301,7 @@ For a given pair of $(\tau, \delta)$, we simulate stellar variability using a Ga
 where $\mathcal{U}(a, b)$ denotes a uniform distribution of lower bound $a$ and upper bound $b$.
 
 \subsubsection*{Results}
-The results of this injection-recovery procedure are shown in \autoref{fig:simu} and highlight particularly well the benefit of \textsf{nuance} against the \wtls{} strategy on transits with relatively low depth compared to the stellar variability amplitude, and a relatively small duration compared to the stellar variability period. This empirical statement only concerns light curves with a given amount of white noise, and may vary depending on the length of the observing window or the number of transits. For this reason, quantifying for which values of $(\tau, \delta)$ \textsf{nuance} outperforms \wtls{} would only apply to this specific example. While more examples are considered in the following \autoref{real}, proper guidelines on when to use \textsf{nuance} instead of more classic detrending techniques are discussed in \autoref{when}.
+The results of this injection-recovery procedure are shown in \autoref{fig:simu} and highlight particularly well the benefit of \textsf{nuance} against the \wtls{} strategy on transits with relatively low depth compared to the stellar variability amplitude, and a relatively small duration compared to the stellar variability period. This empirical statement only concerns light curves with a given amount of white noise, and may vary depending on the length of the observing window or the number of transits. For this reason, quantifying for which values of $(\tau, \delta)$ \textsf{nuance} outperforms \wtls{} would only apply to this specific example.
 \begin{figure}[H]
     \begin{centering}
         \includegraphics[width=\linewidth]{../workflows/synthetic-injection-recovery/figures/synthetic_ir.pdf}

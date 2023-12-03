@@ -13,6 +13,7 @@ all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14-clean.
 rule all:
     input:
         "figures/true_and_false_positives_bars.pdf",
+        "figures/true_false_positives.pdf",
         "figures/searched/1019692.pdf",
         "figures/cleaned/1019692.pdf"
 

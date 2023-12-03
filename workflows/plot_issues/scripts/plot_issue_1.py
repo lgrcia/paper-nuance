@@ -57,18 +57,18 @@ plt.figure(figsize=(6,5))
 offset = 0.03
 xoff = time.max()*1.2
 
-plt.text(xoff, 1.01, f"transit SNR", ha="center", fontsize=12, va="center")
+plt.text(xoff, 1.01, f"transit SNR", ha="center", fontsize=14, va="center")
 plt.text(time.mean(), 1.01, f"Light curve", ha="center", fontsize=14, alpha=0.7)
 
 plt.plot(time, fluxes[0], ".", c="0.8")
 plt.plot(time, signal, c="k", alpha=0.4, lw=2)
 plt.text(time.mean(), 1-1.8*depth, "white noise + transit", ha="center", fontsize=14)
-plt.text(xoff, 1, f"{snrs[0]:.2f}", ha="center", fontsize=12, va="center")
+plt.text(xoff, 1, f"{snrs[0]:.2f}", ha="center", fontsize=14, va="center")
 
 plt.plot(time, fluxes[1] - offset, ".", c="0.8")
 plt.plot(time, red_noise + 1 - offset, c="C3", alpha=0.5, lw=2)
 plt.text(time.mean(), 1 - offset -1.8*depth, "+ correlated noise", ha="center", fontsize=14, c="C3")
-plt.text(xoff, 1 - offset, f"{snrs[1]:.2f}", ha="center", fontsize=12, va="center")
+plt.text(xoff, 1 - offset, f"{snrs[1]:.2f}", ha="center", fontsize=14, va="center")
 
 plt.axis("off")
 plt.tight_layout()
