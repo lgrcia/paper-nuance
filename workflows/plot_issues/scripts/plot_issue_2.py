@@ -115,7 +115,7 @@ for i, (flux, var, gp) in enumerate(zip(lightcurves, variabilities, cond_gps)):
 # Plots
 # -----
 offset = 0.05
-plt.figure(figsize=(13,9))
+plt.figure(figsize=(10,8))
 
 wotan_color = "C4"
 gp_color = "C3"
@@ -162,7 +162,7 @@ def text(x, method, color):
     xrange = np.array([0, 2.5]) + x + 0.7
     plt.text(xrange.mean(), OFFSET-0.01, method, ha="center", fontsize=15, c=color)
     plt.plot(xrange + 0.1, (OFFSET-0.015, OFFSET-0.015), "-", c=color, lw=2)
-    plt.text(time[-cut] + x + snr_offset, OFFSET-0.03, "transit SNR", ha="center", fontsize=14, c=txt_color)
+    plt.text(time[-cut] + x + snr_offset, OFFSET-0.03, "SNR", ha="center", fontsize=14, c=txt_color)
     plt.text(time[cut:-cut].mean() + x, OFFSET-0.03, "cleaned light curve", ha="center", fontsize=14, c=txt_color)
 
 text(x_wotan, "a. biweight", wotan_color)
