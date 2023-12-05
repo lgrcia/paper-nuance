@@ -49,11 +49,10 @@ rule concat:
         params = [f"data/params/{i}.yaml" for i in idxs],
         bls = [f"data/results/bls/{i}.yaml" for i in idxs],
         nuance = [f"data/results/nuance/{i}.yaml" for i in idxs]
-    output: 'data/results.csv'
-    
+    output: protected('results/results.csv')
     script: 'scripts/concat.py'
 
 rule plot:
-    input: 'data/results.csv'
+    input: 'results/results.csv'
     output: 'figures/control_test.pdf'
     script: 'scripts/plot.py'
