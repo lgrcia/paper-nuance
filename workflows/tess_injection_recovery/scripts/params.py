@@ -12,10 +12,11 @@ star = Star(
     info["star_radius"], info["star_mass"], info["star_amplitude"], info["star_period"]
 )
 
-min_period = 0.4
-max_period = 5.0
-max_snr = 30.0
-min_snr = 2.0
+config = snakemake.config["inject"]
+min_period = config["min_period"]
+max_period = config["max_period"]
+max_snr = config["max_snr"]
+min_snr = config["min_snr"]
 # -----
 
 dt = np.median(np.diff(data["time"]))

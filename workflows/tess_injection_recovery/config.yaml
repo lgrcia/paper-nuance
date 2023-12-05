@@ -1,1 +1,15 @@
 n: 8
+inject:
+  min_period: 0.4
+  max_period: 5.0
+  max_snr: 30.0
+  min_snr: 2.0
+search:
+  periods_linspace: 
+    - 0.3
+    - 6.0
+    - 4000
+cleaning:
+  trimming: 300
+  iterations: 4
+  sigma: 3.5

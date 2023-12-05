@@ -2,21 +2,42 @@ configfile: "config.yaml"
 
 
 # targets TICs
-targets = [153193474, 140212114, 452793374, 306331621, 291337184, 355462802, 386713079, 20297123, 33866201, 450104815, 234271852, 62397411, 326769598, 453095489, 381920488, 306359037, 100481123, 70111, 38842861, 46157102, 152875048]
 idxs = range(config["n"] ** 2)
 
 import pandas as pd
 
 all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14-clean.csv").Name.values
-
+methods = {
+    "bls_bspline": "bspline + BLS",
+    "bls_wotan3D": "biweight + BLS",
+    "bls_harmonics": "harmonics + BLS",
+    "bens": "sinusoids + BLS",
+    "nuance": "nuance",
+}
 
 rule all:
     input:
-        "figures/true_and_false_positives_bars.pdf",
-        "figures/true_false_positives.pdf",
-        "figures/searched/1019692.pdf",
-        "figures/cleaned/1019692.pdf"
+        [f"results/{method}.npy" for method in methods.keys()],
+        "figures/tpfp_bars.pdf", 
+        "figures/tpfp.pdf",
+        # "figures/searched/1019692.pdf",
+        # "figures/cleaned/1019692.pdf"
 
+rule compute_true_false_positives:
+    input: "data/{target}/info.yaml", "data/{target}/recovered/{method}/results.csv", "data/{target}/cleaned.fluxes"
+    output: "data/{target}/recovered/{method}.npy",
+    script: "scripts/true_false_positives.py"
+
+rule concatenate_tf_positives:
+    input: [f"data/{target}/recovered/{{method}}.npy" for target in all_targets]
+    output: "results/{method}.npy"
+    script: "scripts/concatenate_tf_positives.py"
+
+rule plot_tp_fp:
+    input: [f"results/{method}.npy" for method in methods.keys()]
+    output: "figures/tpfp_bars.pdf", "figures/tpfp.pdf"
+    params: methods=methods
+    script: "scripts/plot_tpfp.py"
 
 include: "search.smk"
 include: "plots.smk"

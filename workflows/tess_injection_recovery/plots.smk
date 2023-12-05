@@ -1,14 +1,6 @@
 # I created this because i need some more info per target and don't want to modify the 
 # download script, which would trigger a repprocessing of all the data
 
-methods = {
-    "bls_bspline": "bspline + BLS",
-    "bls_wotan3D": "biweight + BLS",
-    "bls_harmonics": "harmonics + BLS",
-    "bens": "sinusoids + BLS (Ben's)",
-    "nuance": "nuance",
-}
-
 rule extra_info:
     output: "data/{target}/extra_info.yaml"
     run:
@@ -28,7 +20,7 @@ rule plot_lc:
     output: "figures/cleaned/{target}.pdf"
     script: "scripts/plot_lc.py"
 
-rule plot_comparison:
+rule plot_single_comparison:
     input: 
         results=[f"data/{{target}}/recovered/{method}/results.csv" for method in methods.keys()],
         info="data/{target}/info.yaml",
@@ -38,8 +30,6 @@ rule plot_comparison:
     params:
         methods = methods
     output: "figures/searched/{target}.pdf"
-    params: 
-        methods=methods
     script: "scripts/plot_comparison.py"
 
 # rule plot_results:
@@ -49,9 +39,3 @@ rule plot_comparison:
 #         methods = methods
 #     output: "figures/searched/{target}.pdf"
 #     script: "scripts/plot_results.py"
-
-
-rule copy_figure:
-    input: "test/{target}_search_comparison.pdf"
-    output: "/Users/lgrcia/papers/phd-thesis/figures/nuance/{target}_search_comparison.pdf"
-    shell: "cp {input} {output}"

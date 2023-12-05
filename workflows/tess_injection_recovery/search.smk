@@ -97,11 +97,11 @@ rule nuance_search:
 
 rule concatenate:
     input:
-        recovered=[f"data/{{target}}/recovered/{{tool}}/{lc}.params" for lc in idxs],
+        recovered=[f"data/{{target}}/recovered/{{method}}/{lc}.params" for lc in idxs],
         injected=[f"data/{{target}}/injected/{lc}.fluxes" for lc in idxs],
         fresh = "data/{target}/fresh_search.yaml",
     output:
-        "data/{target}/recovered/{tool}/results.csv",
+        "data/{target}/recovered/{method}/results.csv",
     script:
         "scripts/concatenate.py"
 
