@@ -43,7 +43,6 @@ rule:
 rule make_lightcurves:
     input: "data/params/{seed, \d+}.yaml"
     output: "data/lightcurves/{seed}.npy"
-    conda: "envs/base.yaml"
     priority: 0
     script: "scripts/make_lightcurve.py"
 
@@ -52,20 +51,17 @@ rule clean:
         "data/params/{seed, \d+}.yaml",
         "data/lightcurves/{seed, \d+}.npy"
     output: "data/results/{seed}.yaml"
-    conda: "envs/base.yaml"
     priority: 1
     script: "scripts/clean.py"
 
 rule detection_results:
     input: dataset_results
-    output: protected("data/results.csv")
-    conda: "envs/base.yaml"
+    output: protected("results/results.csv")
     priority: 2
     script: "scripts/aggregate_results.py"
 
 rule plot:
-    input: "data/results.csv"
+    input: "results/results.csv"
     output: "figures/result.pdf"
-    conda: "envs/base.yaml"
     priority: 3
     script: "scripts/plot.py"

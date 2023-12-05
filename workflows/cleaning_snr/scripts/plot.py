@@ -21,6 +21,8 @@ scale = 1.2
 W = n + 1
 H = n + 1
 
+snr_lim = 6
+
 fig = plt.figure(None, (7, 6))
 
 def I(i, j):
@@ -48,7 +50,7 @@ if df is not None:
             stats.y_edge.max(),
         ),
         aspect="auto",
-        vmax=5,
+        vmax=snr_lim,
         cmap="Greys_r",
     )
 
@@ -76,8 +78,9 @@ if df is not None:
 
 # removing some axes
 # ------------------
-ax = plt.subplot(H, W, I(W - 1, 0))
-plt.axis("off")
+for i in range(1, W*H):
+    ax = plt.subplot(H, W, i)
+    plt.axis("off")
 
 # light curves examples
 # ---------------------
@@ -125,6 +128,7 @@ axins = main.inset_axes((0.62, 1.03, 0.3, 0.06))
 if df is not None:
     cb = fig.colorbar(im, cax=axins, orientation="horizontal", ticks=[])
     cb.ax.text(-0.4, 0.5, "0", va="center", ha="right")
-    cb.ax.text(5.4, 0.5, "> 5", va="center", ha="left")
+    cb.ax.text(snr_lim + .4, 0.5, f"> {snr_lim}", va="center", ha="left")
     cb.ax.text(3, 1.5, "SNR", va="center", ha="right")
+
 plt.savefig(snakemake.output[0])
