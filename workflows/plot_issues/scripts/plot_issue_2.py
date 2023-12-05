@@ -115,7 +115,7 @@ for i, (flux, var, gp) in enumerate(zip(lightcurves, variabilities, cond_gps)):
 # Plots
 # -----
 offset = 0.05
-plt.figure(figsize=(10,8))
+plt.figure(figsize=(10,7))
 
 wotan_color = "C4"
 gp_color = "C3"
