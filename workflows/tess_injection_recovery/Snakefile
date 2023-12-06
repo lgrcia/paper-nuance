@@ -20,8 +20,8 @@ rule all:
         [f"results/{method}.npy" for method in methods.keys()],
         "figures/tpfp_bars.pdf", 
         "figures/tpfp.pdf",
-        # "figures/searched/1019692.pdf",
-        # "figures/cleaned/1019692.pdf"
+        "figures/searched/1019692.pdf",
+        "figures/cleaned/1019692.pdf"
 
 rule compute_true_false_positives:
     input: "data/{target}/info.yaml", "data/{target}/recovered/{method}/results.csv", "data/{target}/cleaned.fluxes"
@@ -35,9 +35,14 @@ rule concatenate_tf_positives:
 
 rule plot_tp_fp:
     input: [f"results/{method}.npy" for method in methods.keys()]
-    output: "figures/tpfp_bars.pdf", "figures/tpfp.pdf"
+    output: "figures/tpfp.pdf", "figures/tpfp_bars.pdf", "figures/tpfp_ims.pdf"
     params: methods=methods
     script: "scripts/plot_tpfp.py"
+
+rule record_stats:
+    input: [f"results/{method}.npy" for method in methods.keys()]
+    output: "results/stats.yaml"
+    script: "scripts/record_stats.py"
 
 include: "search.smk"
 include: "plots.smk"
