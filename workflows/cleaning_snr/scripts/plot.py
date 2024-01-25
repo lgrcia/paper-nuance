@@ -1,134 +1,127 @@
-import sys
-
+# make_lightcurve.py
+import jax
 import numpy as np
-import pandas as pd
-import yaml
-from scipy.stats import binned_statistic_2d
-
-sys.path.append("./lib")
-import matplotlib.pyplot as plt
-from make_lightcurve import make_lc
+import tinygp
+from nuance.utils import transit
 from make_params import make
-from matplotlib.patches import ConnectionPatch
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from utils import depth as true_depth
-from utils import error
+import pandas as pd
+import numpy as np
+from scipy.stats import binned_statistic_2d
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 
+
+def show_df(df, ax):
+    bins = (30, 30)
+
+    if df is not None:
+        snr, var, amp = df.values.T.astype(float)
+        snr = np.maximum(0, snr)
+        stats = binned_statistic_2d(var, amp, snr, bins=bins)
+        im = ax.imshow(
+            stats.statistic.T,
+            origin="lower",
+            extent=(
+                stats.x_edge.min(),
+                stats.x_edge.max(),
+                stats.y_edge.min(),
+                stats.y_edge.max(),
+            ),
+            aspect="auto",
+            vmax=10,
+            vmin=5,
+            cmap="Greys_r",
+        )
+        return im
+    
+config = snakemake.config
+true_depth = config["depth"]
+error = config["error"]
+time = np.arange(0, config["length"], config["exposure"])
+
+
+jax.config.update("jax_enable_x64", True)
+
+
+def build_gp(time, params):
+    kernel = tinygp.kernels.quasisep.SHO(
+        params["omega"], params["quality"], sigma=params["sigma"]
+    )
+    gp = tinygp.GaussianProcess(kernel, time)
+    return gp
+
+
+def make_lc(time, params, seed):
+    gp = build_gp(time, params)
+
+    signal = transit(
+        time, time.mean(), params["duration"], params["depth"], c=50000, P=None
+    )
+    y = gp.sample(jax.random.PRNGKey(seed)) + signal
+
+    error = np.ones_like(y) * params["error"]
+
+    return y, y + np.random.randn(len(y)) * error
+
+
+deltas = np.linspace(0.5, 4, 3)[::-1]
+taus = np.linspace(2, 5, 4)
+time = np.arange(0, config["length"], config["exposure"])
+t0 = time.mean()
+transit_signal = (np.abs(t0 - time) < config["duration"] / 2).astype(float) * -1
+
+taus_signals = []
+for t in taus:
+    params = make(config, delta_v=1, tau_v=t, seed=10)
+    taus_signals.append(make_lc(time, params, 10))
+
+deltas_signals = []
+for d in deltas:
+    params = make(config, delta_v=d, tau_v=5, seed=10)
+    deltas_signals.append(make_lc(time, params, 10))
+
+fig = plt.figure(None, (8, 4))
+gs = GridSpec(
+    4,
+    5,
+)
+
+for i, signal in enumerate(taus_signals):
+    ax = plt.subplot(gs[0, i])
+    ax.axis("off")
+    ax.plot(time, signal[1], ".", c="0.8", ms=1.5)
+    ax.plot(time, signal[0], c="0.4", lw=1)
+    ax.set_ylim(-0.01, 0.01)
+    ax.set_xlim(t0 - 0.8, t0 + 0.8)
+    ax.set_title(r"$\tau = {}$".format(taus[i]), fontsize=10)
+
+for i, signal in enumerate(deltas_signals):
+    ax = plt.subplot(gs[1 + i, -1])
+    ax.axis("off")
+    ax.plot(time, signal[1], ".", c="0.8", ms=1.5)
+    ax.plot(time, signal[0], c="0.4", lw=1)
+    ax.set_ylim(-0.01, 0.01)
+    ax.set_xlim(t0 - 0.8, t0 + 0.8)
+    ax.set_title(r"$\delta = {}$".format(deltas[i]), fontsize=10)
+
+bi_ax = plt.subplot(gs[1::, 0:2])
 df = pd.read_csv(snakemake.input[0])
+_ = show_df(df, bi_ax)
+bi_ax.text(0.05, 0.9, "bi-weight", transform=bi_ax.transAxes, color="w", fontsize=11)
+bi_ax.set_ylabel(r"$\delta$")
+bi_ax.set_xlabel(r"$\tau$")
 
-n = 3  # number of small plots
-scale = 1.2
-W = n + 1
-H = n + 1
+gp_ax = plt.subplot(gs[1::, 2:4])
+df = pd.read_csv(snakemake.input[1])
+im = show_df(df, gp_ax)
+gp_ax.text(0.05, 0.9, "GP", transform=gp_ax.transAxes, color="w", fontsize=11)
+gp_ax.set_yticklabels([])
+gp_ax.set_xlabel(r"$\tau$")
+axins = gp_ax.inset_axes((0.62, 1.03, 0.3, 0.06))
+cb = fig.colorbar(im, cax=axins, orientation="horizontal", ticks=[])
+cb.ax.text(4.7, 0.5, "SNR: 5", va="center", ha="right")
+cb.ax.text(10.4, 0.5, "10", va="center", ha="left")
 
-snr_lim = 6
-
-fig = plt.figure(None, (7, 6))
-
-def I(i, j):
-    return int(j * W + i) + 1
-
-
-for i in range(H * W):
-    ax = plt.subplot(H, W, i + 1)
-
-## Main plot
-main = plt.subplot(H, W, (I(0, 1), I(W - 2, H - 1)))
-
-bins = (30, 30)
-
-if df is not None:
-    snr, var, amp = df.values.T.astype(float)
-    stats = binned_statistic_2d(var, amp, snr, bins=bins)
-    im = main.imshow(
-        stats.statistic.T,
-        origin="lower",
-        extent=(
-            stats.x_edge.min(),
-            stats.x_edge.max(),
-            stats.y_edge.min(),
-            stats.y_edge.max(),
-        ),
-        aspect="auto",
-        vmax=snr_lim,
-        cmap="Greys_r",
-    )
-
-main.set_ylabel(
-    r"$\delta$ (amplitude)",
-    fontsize=14,
-)
-main.set_xlabel(
-    r"$\tau$ (timescale)",
-    fontsize=14,
-)
-params = true_depth
-original_snr = true_depth / np.sqrt(np.mean(error) ** 2 / n)
-
-main.set_title(f"Detrending effect on SNR", loc="left")
-
-if df is not None:
-    main.text(
-        0.1,
-        stats.y_edge.max() + 0.26,
-        f"original SNR: {original_snr:.2f}",
-        color="0.3",
-        va="center",
-    )
-
-# removing some axes
-# ------------------
-for i in range(1, W*H):
-    ax = plt.subplot(H, W, i)
-    plt.axis("off")
-
-# light curves examples
-# ---------------------
-# zoom box params
-a = (0.5, 1)  # xy of lower left box
-b = (10, 5)  # xy of upper right box
-pcolor = "0.7"
-amp = np.linspace(0.5, 3.5, 4)[::-1]
-var = np.linspace(2, b[0] - 1, 3)
-ymax = 0.06
-seed = 10
-
-
-def title(ax, v=None, a=None):
-    title = rf"$\tau = {v:.1f}$" if v is not None else rf"$\delta = {a:.1f}$"
-    ax.set_title(title, fontsize=10)
-
-
-for i, a in enumerate(amp[1::]):
-    ax = plt.subplot(H, W, I(W - 1, i + 1))
-    v = b[0] - 1
-    params = make(delta_v=a, tau_v=v, seed=seed)
-    x, y, e = make_lc(params, seed)
-    ax.plot(x, y, c="0.5")
-    ax.set_ylim(-ymax, ymax)
-    ax.set_xlim(-0.1, np.max(x))
-    plt.axis("off")
-    title(ax, a=a)
-
-
-for i, v in enumerate(var):
-    ax = plt.subplot(H, W, I(i, 0))
-    a = amp[0]
-    params = make(delta_v=a, tau_v=v, seed=seed)
-    x, y, e = make_lc(params, seed)
-    plt.plot(x, y, c="0.5")
-    ax.set_ylim(-ymax, ymax)
-    ax.set_xlim(0.2, np.max(x) * 1.1)
-    plt.axis("off")
-    title(ax, v=v)
-
-fig.tight_layout(pad=2)
-axins = main.inset_axes((0.62, 1.03, 0.3, 0.06))
-
-if df is not None:
-    cb = fig.colorbar(im, cax=axins, orientation="horizontal", ticks=[])
-    cb.ax.text(-0.4, 0.5, "0", va="center", ha="right")
-    cb.ax.text(snr_lim + .4, 0.5, f"> {snr_lim}", va="center", ha="left")
-    cb.ax.text(3, 1.5, "SNR", va="center", ha="right")
+plt.tight_layout()
 
 plt.savefig(snakemake.output[0])

@@ -1,9 +1,11 @@
+configfile: "config.yaml"
 
 from scripts.make_params import make
 from pathlib import Path
 import yaml
 import numpy as np
 from os import path
+from functools import partial
 
 # DATASET CREATION
 # ----------------
@@ -11,19 +13,19 @@ dataset = Path("data/params")
 dataset.mkdir(exist_ok=True, parents=True)
 n = 10000
 np.random.seed(42)
-vars = np.random.uniform(0.1, 10, size=n)
+vars = np.random.uniform(0.1, 5, size=n)
 amps = np.random.uniform(0.1, 5, size=n)
 for i, (var, amp) in enumerate(zip(vars, amps)):
     destination = dataset / f"{i}.yaml"
-    params = make(delta_v=amp, tau_v=var, seed=i)
+    params = make(config, delta_v=amp, tau_v=var, seed=i)
     if not path.exists(destination) or True:
         yaml.dump(params, open(destination, "w"))
 
 # INPUT FUNCTIONS
 # ---------------
-def dataset_results(wildcards):
+def dataset_results(wildcards, which="biweight"):
     seeds, = glob_wildcards(f"data/params" + "/{seed, \d+}.yaml")
-    return expand(f"data/results/{{seed}}.yaml", seed=seeds)
+    return expand(f"data/results/{which}/{{seed}}.yaml", seed=seeds)
 
 def dataset_params(wildcards):
     seeds, = glob_wildcards(f"data/params" + "/{seed, \d+}.yaml")
@@ -38,6 +40,8 @@ wildcard_constraints:
 
 rule:
     input: 
+        # "results/results_biweight.csv",
+        # "results/results_gp.csv",
         "figures/result.pdf"
 
 rule make_lightcurves:
@@ -46,22 +50,36 @@ rule make_lightcurves:
     priority: 0
     script: "scripts/make_lightcurve.py"
 
-rule clean:
+rule clean_biweight:
     input: 
         "data/params/{seed, \d+}.yaml",
         "data/lightcurves/{seed, \d+}.npy"
-    output: "data/results/{seed}.yaml"
+    output: "data/results/biweight/{seed}.yaml"
     priority: 1
-    script: "scripts/clean.py"
+    script: "scripts/clean_biweight.py"
 
-rule detection_results:
-    input: dataset_results
-    output: protected("results/results.csv")
+rule clean_gp:
+    input: 
+        "data/params/{seed, \d+}.yaml",
+        "data/lightcurves/{seed, \d+}.npy"
+    output: "data/results/gp/{seed}.yaml"
+    priority: 1
+    script: "scripts/clean_gp.py"
+
+rule detection_results_biweight:
+    input: partial(dataset_results, which="biweight")
+    output: protected("results/results_biweight.csv")
+    priority: 2
+    script: "scripts/aggregate_results.py"
+
+rule detection_results_gp:
+    input: partial(dataset_results, which="gp")
+    output: protected("results/results_gp.csv")
     priority: 2
     script: "scripts/aggregate_results.py"
 
 rule plot:
-    input: "results/results.csv"
+    input: "results/results_biweight.csv", "results/results_gp.csv"
     output: "figures/result.pdf"
     priority: 3
     script: "scripts/plot.py"

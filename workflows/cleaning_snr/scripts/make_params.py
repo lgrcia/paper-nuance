@@ -2,13 +2,10 @@
 import numpy as np
 import yaml
 import sys
-sys.path.append("./lib")
-sys.path.append("../lib")
-from utils import time, duration, depth, error
 
 argv = sys.argv
 
-def make(seed=None, delta_v=None, tau_v=None):
+def make(config, seed=None, delta_v=None, tau_v=None):
     if seed is None:
         if delta_v is None:
             seed = np.random.randint(1, 1e5)
@@ -17,10 +14,10 @@ def make(seed=None, delta_v=None, tau_v=None):
             tau_v = np.random.uniform(0.1, 25)
         
     params = {
-        "t0" : float(time.mean()),
-        "duration" : duration,
-        "depth" : depth,
-        "error" : error,
+        "t0" : float(config["length"]/2),
+        "duration" : config["duration"],
+        "depth" : config["depth"],
+        "error" : config["error"],
     }
 
     if seed == -1:
@@ -38,10 +35,12 @@ def make(seed=None, delta_v=None, tau_v=None):
     return params
 
 if __name__=="__main__":
+    config = snakemake.config
+    
     if len(argv) > 1:
         seed = int(argv[1])
     else:
         seed = None
         
-    params = make(seed)
+    params = make(config, seed)
     yaml.safe_dump(params, open(f"data/params/{seed}.yaml", "w"))
