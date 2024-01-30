@@ -83,7 +83,7 @@ fig, axes = plt.subplots(
     nrows=len(methods),
     ncols=2,
     gridspec_kw={"width_ratios": [3, 1]},
-    figsize=(8.5, 2.5 * n_methods),
+    figsize=(8.5, 2 * n_methods),
 )
 for i, (method, title) in enumerate(methods.items()):
     ax = axes[i, 1]

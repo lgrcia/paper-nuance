@@ -74,14 +74,15 @@ rule bls:
         fluxes="data/{target}/injected/{lc}.fluxes",
         info="data/{target}/info.yaml",
         periods="data/{target}/periods.npy",
+        gp="data/{target}/gp.yaml",
     output:
         wotan3D="data/{target}/recovered/bls_wotan3D/{lc}.params",
         harmonics="data/{target}/recovered/bls_harmonics/{lc}.params",
         bspline="data/{target}/recovered/bls_bspline/{lc}.params",
         bens="data/{target}/recovered/bens/{lc}.params",
+        gp="data/{target}/recovered/gp/{lc}.params",
     script:
         "scripts/bls.py"
-
 
 rule nuance_search:
     input:

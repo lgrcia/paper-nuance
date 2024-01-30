@@ -8,10 +8,11 @@ import pandas as pd
 
 all_targets = pd.read_csv("static/tess-ultra-fast-rotators-brighter-mag14-clean.csv").Name.values
 methods = {
-    "bls_bspline": "bspline + BLS",
-    "bls_wotan3D": "biweight + BLS",
+    "bls_bspline": "Bspline + BLS",
+    "bls_wotan3D": "bi-weight + BLS",
+    "gp": "GP + BLS",
     "bls_harmonics": "harmonics + BLS",
-    "bens": "sinusoids + BLS",
+    "bens": "iterative + BLS",
     "nuance": "nuance",
 }
 

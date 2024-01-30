@@ -151,9 +151,9 @@ plt.savefig(snakemake.output[1])
 
 from scipy.stats import binned_statistic_2d
 
-cmap = "viridis"
+cmap = "Greys_r"
 u = 4
-fig = plt.figure(figsize=(8, 4.2))
+fig = plt.figure(figsize=(8, 3.5))
 x = 1e-1
 gs = fig.add_gridspec(
     3,
@@ -190,7 +190,7 @@ for i, f in enumerate(snakemake.input):
         ax.set_yticklabels([])
     ax.set_xticklabels([])
 
-    ax.set_title(methods_names[method], loc="center")
+    ax.set_title(methods_names[method], loc="center", fontsize=10)
 
     ax = fig.add_subplot(gs[1, i])
     stats = binned_statistic_2d(tau[mask], delta[mask], tf[mask], bins=bins)

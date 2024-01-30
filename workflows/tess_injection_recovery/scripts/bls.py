@@ -61,6 +61,27 @@ results = bls(time, flatten_flux, error)
 
 save_result(flatten_trend, results, snakemake.output.wotan3D)
 
+# gp
+# --
+from nuance.kernels import rotation
+import jax
+
+gp_params = yaml.full_load(open(snakemake.input.gp, "r"))
+build_gp, init = rotation(info["star_period"], np.mean(data["error"]), long_scale=0.5)
+gp = build_gp(gp_params, data["time"])
+
+@jax.jit
+def mu(y, X_test):
+    _, cond =  gp.condition(y, X_test)
+    return cond.mean
+
+flatten_flux = flux - mu(flux - np.median(flux), time)
+flatten_flux -= np.median(flatten_flux)
+flatten_flux += 1.0
+
+results = bls(time, flatten_flux, error)
+
+save_result(flatten_trend, results, snakemake.output.gp)
 
 # harmonics
 # ---------
