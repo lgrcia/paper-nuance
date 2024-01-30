@@ -3,16 +3,19 @@ import numpy as np
 import os
 from multiprocessing import cpu_count
 
-cores = int(eval(snakemake.wildcards.cores))
+cores = 1 #int(eval(snakemake.wildcards.cores))
 os.environ["XLA_FLAGS"] = f"--xla_force_host_platform_device_count={cores}"
 
 import jax
 
-from astropy.timeseries import BoxLeastSquares
-from nuance import Nuance
 from time import time as _time
+import jax
+import os 
 
+os.environ["XLA_FLAGS"] = f"--xla_force_host_platform_device_count={1}"
 
+from nuance import Nuance
+print(jax.device_count())
 
 n_durations = int(eval(snakemake.wildcards.durations))
 periods = np.linspace(*[eval(i) for i in snakemake.wildcards.periods.split("_")])

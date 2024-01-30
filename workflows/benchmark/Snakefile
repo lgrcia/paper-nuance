@@ -1,6 +1,9 @@
 
 import numpy as np
 from pathlib import Path
+import jax
+
+print(jax.device_count())
 
 N_POINTS = [500, 1000, 2500, 5000, 10000, 20000, 30000, 50000, 75000, 100000, 150000, 200000]
 N_X = [1, 2, 3, 6, 8, 10]
@@ -42,7 +45,7 @@ rule nuance:
 
 rule plot:
     input:
-        nuance = [f"data/nuance/cores_12/periods_1_10_1000/durations_2/{n}_1.yaml" for n in N_POINTS],
+        nuance = [f"data/nuance/cores_1/periods_1_10_1000/durations_2/{n}_1.yaml" for n in N_POINTS],
         bls = [f"data/bls/periods_1_10_1000/durations_2/{n}_1.yaml" for n in N_POINTS]
     params: points = N_POINTS
     output: "figures/nuance_vs_bls.pdf"
