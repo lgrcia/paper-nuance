@@ -3,25 +3,13 @@ import pickle
 import pandas as pd
 import yaml
 
-results = []
-
-for b, n, p in zip(
-    snakemake.input.biweight_bls,
-    snakemake.input.nuance,
-    snakemake.input.params,
-):
-    params = yaml.full_load(open(p, "r"))
-    bls = pickle.load(open(b, "rb"))
-    nuance = pickle.load(open(n, "rb"))
-    results.append(
-        {
-            "period": params["period"],
-            "tau": params["tau"],
-            "delta": params["delta"],
-            "bls_period": bls["period"],
-            "nuance_period": nuance["period"],
-        }
-    )
+methods = ["nuance", *snakemake.params["methods"]]
+results = {
+    method: [pickle.load(open(f, "rb"))["period"] for f in snakemake.input[method]] for method in methods
+}
+results["tau"] = [yaml.full_load(open(p, "r"))["tau"] for p in snakemake.input.params]
+results["delta"] = [yaml.full_load(open(p, "r"))["delta"] for p in snakemake.input.params]
+results["period"] = [yaml.full_load(open(p, "r"))["period"] for p in snakemake.input.params]
 
 df = pd.DataFrame(results)
 df.to_csv(snakemake.output[0], index=False)

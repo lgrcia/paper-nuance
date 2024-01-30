@@ -1,11 +1,11 @@
 
 configfile: "config.yaml"
 
-methods = ["nuance", "biweight_bls"]
+methods = ["bspline", "harmonics", "iterative", "biweight", "gp"]
 idxs = range(config["n"])
 
 rule all:
-    input: "figures/synthetic_ir.pdf"
+    input: "figures/synthetic_ir.pdf", "data/results.csv"
 
 rule params:
     output: "data/params/{i}.yaml"
@@ -20,28 +20,40 @@ rule lightcurve:
     priority: 0
     script: "scripts/lightcurve.py"
 
-rule search:
+
+rule detrend:
     input: 
         lc="data/lightcurves/{i}.npy",
         params="data/params/{i}.yaml"
-    output: "data/results/{method}/{i}.pkl"
-    conda: "envs/base.yaml"
-    priority: 1
+    output: "data/detrended/{method}/{i}.npy"
     script: "scripts/{wildcards.method}.py"
+
+rule bls:
+    input: 
+        lc="data/detrended/{method}/{i}.npy",
+        params="data/params/{i}.yaml"
+    output: "data/results_bls/{method}/{i}.pkl"
+    script: "scripts/bls.py"
+
+rule nuance:
+    input: 
+        lc="data/lightcurves/{i}.npy",
+        params="data/params/{i}.yaml"
+    output: "data/results_nuance/{i}.pkl"
+    script: "scripts/nuance.py"
 
 rule aggregate:
     input: 
-        biweight_bls = [f"data/results/biweight_bls/{i}.pkl" for i in idxs],
-        nuance = [f"data/results/nuance/{i}.pkl" for i in idxs],
+        **{method: [f"data/results_bls/{method}/{i}.pkl" for i in idxs] for method in methods},
+        nuance = [f"data/results_nuance/{i}.pkl" for i in idxs],
         params = [f"data/params/{i}.yaml" for i in idxs]
     output: "data/results.csv"
-    conda: "envs/base.yaml"
-    priority: 2
+    params: methods=methods
     script: "scripts/aggregate.py"
 
 rule plot:
     input: "data/results.csv"
     output: "figures/synthetic_ir.pdf"
-    conda: "envs/base.yaml"
+    params: methods=methods
     priority: 3
     script: "scripts/plot.py"

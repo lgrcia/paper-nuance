@@ -7,8 +7,8 @@ import yaml
 i = int(snakemake.wildcards.i)
 n = int(snakemake.config["n"])
 np.random.seed(i)
-delta = np.random.uniform(0.1, 25)
-tau = np.random.uniform(0.1, 10)
+delta = np.random.uniform(0.1, 15)
+tau = np.random.uniform(0.1, 5)
 
 # delta = np.linspace(0.1, 25, n)
 # tau = np.linspace(0.1, 10, n)

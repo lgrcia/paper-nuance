@@ -1,0 +1,32 @@
+import numpy as np
+import yaml
+
+time, flux, error = np.load(snakemake.input.lc)
+params = yaml.full_load(open(snakemake.input.params, "r"))
+
+star_period = params["duration"] * params["tau"] / 2
+
+
+# makes an harmonics design matrix of time
+def make_harmonics(time, period, nharmonics=4):
+    # make design matrix
+    X = np.ones((len(time), 2 * nharmonics + 1))
+    X[:, 1] = time
+    for i in range(1, nharmonics):
+        X[:, 2 * i + 1] = np.sin(2 * np.pi * i * time / period)
+        X[:, 2 * i + 2] = np.cos(2 * np.pi * i * time / period)
+
+    return X
+
+
+X = make_harmonics(time, star_period, nharmonics=5)
+
+# solve for the coefficients
+coeffs = np.linalg.solve(X.T @ X, X.T @ flux)
+# make the model
+flatten_trend = X @ coeffs
+flatten_flux = flux - flatten_trend
+flatten_flux -= np.mean(flatten_flux)
+flatten_flux += 1.0
+
+np.save(snakemake.output[0], [time, flatten_flux, error])
