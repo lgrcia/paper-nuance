@@ -1,4 +1,4 @@
-\documentclass[modern]{aastex631}
+\documentclass[modern,linenumbers]{aastex631}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{hyperref}
@@ -71,7 +71,7 @@
 \correspondingauthor{Lionel J. Garcia}
 \email{lgarcia@flatironinstitute.org}
 
-\keywords{transit search, exoplanets, active stars, stellar variability, time series analysis, Gaussian process, TESS}
+\keywords{exoplanet detection methods, stellar activity, time series analysis, gaussian processes regression, computational methods, GPU computing}
 
 \begin{abstract}
     The detection of planetary transits in the light curves of active stars, featuring correlated noise in the form of stellar variability, remains a challenge. Depending on the noise characteristics, we show that the traditional technique that consists of detrending a light curve before searching for transits alters their signal-to-noise ratio, and hinders our capability to discover exoplanets transiting rapidly-rotating active stars. We present \nuancemethod{}, an algorithm to search for transits in light curves while simultaneously accounting for the presence of correlated noise, such as stellar variability and instrumental signals. We assess the performance of \nuancemethod{} on simulated light curves as well as on the TESS light curves of 438 rapidly-rotating M dwarfs. For each dataset, we compare our method to 5 commonly-used detrending techniques followed by a search with the Box-Least-Square algorithm. Overall, we demonstrate that \nuancemethod{} is the most performant method in 93\% of cases, leading to both the highest number of true positives and the lowest number of false positive detections. Although simultaneously searching for transits while modeling correlated noise is expected to be computationally expensive, we make our algorithm tractable and availa ble as the \textsf{JAX}-powered Python package \href{https://github.com/lgrcia/nuance}{\nuancecode{}}, allowing its use on distributed environments and GPU devices. Finally, we explore the prospects offered by the \nuancemethod{} formalism, and its use to advance our knowledge of planetary systems around active stars, both using space-based surveys and sparse ground-based observations.
