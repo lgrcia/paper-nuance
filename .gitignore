@@ -30,6 +30,10 @@ workflows/**/data
 workflows/tess_injection_recovery/figures
 workflows/**/*.ipynb
 
+!workflows/tess_injection_recovery/figures/tpfp*.pdf
+workflows/benchmark2
+latex/draft*
+review_*
 
 **/.DS_Store
 **npy
