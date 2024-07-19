@@ -3,7 +3,7 @@
 \include{stylez}
 
 % figure options
-\graphicspath{{../figures}}
+\graphicspath{{./figures}}
 
 \begin{document}
 
@@ -39,7 +39,7 @@ Transiting exoplanets are keystone objects for the field of exoplanetary science
 Commonly used transit-search algorithms, such as the Box-Least-Squares algorithm \citep[BLS,][]{bls} are capable of detecting transits in light curves containing only transit signals and white noise. Using this method, the simplest way to detect transits in a light curve featuring correlated noise (either astrophysical or instrumental), is to first clean it from nuisance signals before performing the search. This strategy is widely adopted by the community, both using physically-motivated systematic models like \cite{everest1, everest2}, or filtering techniques (\citealt{Jenkins2010}, \citealt{wotan}). However, when correlated noise starts resembling transits, this cleaning step, often called \textit{detrending}, is believed to degrade their detectability \cite[see subsection 4.3 of][]{wotan}. In this case, the only alternative to search for transits is to perform a full-fledged modeling of the light curve, including both transits and correlated noise, and to compute the likelihood of the data to the transit model on a wide parameter space, an approach largely avoided due to its intractable nature. Nonetheless, \cite{kovacs2016} ask: \textit{Periodic transit and variability search with simultaneous systematics filtering: Is it worth it?}. The latter study explores a handful of cases and generally discards the benefit of using a full-fledged approach.\\\\
 \newpage
 In this paper, we identify regions of light curves morphological parameter space for which a full-fledged transit search is necessary, and we present \nuancemethod{}\footnote{Throughout the paper, \nuancemethod{} written in italics refers to the algorithm, while \nuancecode{} in sans-serif refers to its implementation published as a Python package in its version 0.5.2 (see \autoref{package}).}, a method to search for transit signals while simultaneously modeling correlated noises in a tractable way. In \autoref{issues}, we describe the effect of correlated noise on transit light curves and the effect of its detrending on transit signals detectability. In \autoref{nuance}, we present \nuance{}, and the two main steps on which this method is based: the linear search and the periodic search. In \autoref{results}, we test the performance of \nuance{} on a wide variety of cases, and compare our method to commonly used transit search algorithms. This include transits injected in synthetic datasets, but also in the TESS light curves of 438 rapidly-rotating M dwarfs. Finally, in \autoref{discussion}, we discuss the results and the limitations of \nuance{}, before concluding in \autoref{conclusion}.\\\\
-This paper was compiled from source code available in a git-versioned repository (\href{https://github.com/lgrcia/paper-nuance}{\color{linkcolor}\faFileTextO}) and used the \textsf{snakemake}\footlink{https://snakemake.readthedocs.io} workflow management tool. Source code of the \textsf{nuance} \textsf{Python} package is also available in a git-versioned repository (\href{https://github.com/lgrcia/nuance}{\color{linkcolor}\faCode}) together with an online documentation (\href{https://nuance.readthedocs.io}{\color{linkcolor}\faBook}). Finally, we provide links to the source code used to produce each figure (inidcated by the {\color{linkcolor}\codeicon} icon).
+This paper was compiled from source code available in a git-versioned repository (\href{https://github.com/lgrcia/paper-nuance}{\color{linkcolor}\faFileTextO}) and used the \textsf{snakemake}\footlink{https://snakemake.readthedocs.io} workflow management tool. Source code of the \textsf{nuance} \textsf{Python} package is also available in a git-versioned repository (\href{https://github.com/lgrcia/nuance}{\color{linkcolor}\faCode}) together with an online documentation (\href{https://nuance.readthedocs.io}{\color{linkcolor}\faBook}). Finally, we provide links to the source codes used to produce each figure (indicated by {\color{linkcolor}\codeicon}).
 
 \newpage
 \section{Motivation}\label{issues}
@@ -78,7 +78,7 @@ The CDPP is computed by decomposing the data in the time-frequency domain using 
 where $CDPP_D$ is the CDPP computed for a given transit duration $D$ and $\hat{\Delta}$ is the transit depth after detrending. For simplicity, the CDPP is computed using the method from \cite{Gilliland2011} implemented in the \textsf{lightkurve} Python package \citep{Lightkurve} and $\hat{\Delta}$ is the depth obtained by solving \autoref{eq:linear_model} with the last column of $\bm{X}$ containing a normalized transit model.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.6\linewidth]{../workflows/plot_issues/figures/issue1.pdf}
+        \includegraphics[width=0.6\linewidth]{./issue1.pdf}
         \caption{Illustration of the effect of correlated noise on a single transit SNR. An hour-long transit of depth 0.5\% is generated on top of white noise (standard deviation of 0.15\%) as part of a 24-hours observation with an exposure time of 1 minute (top). Then, in the bottom plot, correlated noise is added, generated using a GP with an SHO kernel of hyperparameters $\omega=60$, $Q=0.5$ and $\sigma=\Delta/4$ . The SNR on the right of each light curve is computed using \autoref{eq:snr}. Models used to simulate these data are provided in \autoref{light_curves_simulations}. \codelink{workflows/plot_issues/scripts/plot_issue_1.py}}
         \label{fig:issue1}
     \end{centering}
@@ -90,7 +90,7 @@ The presence of instrumental correlated noise motivated the development of syste
 In \autoref{fig:issue2}, we simulate a transit signal on top of which we add photometric stellar variability with different timescales, sampled from a GP with an SHO kernel described in \autoref{app_gp}. For each light curve, we reconstruct and detrend stellar variability in two ways: one using the widely-adopted Tukey's bi-weight filter, presented in \cite{tukey} and using the implementation from \textsf{wõtan}\footnote{\href{https://github.com/hippke/wotan}{https://github.com/hippke/wotan}} \citep{wotan}; the other using the same GP from which the data have been sampled. We then estimate the resulting transit depth and compute the remaining transit SNR using \autoref{eq:snr}. \autoref{fig:issue2} clearly shows the effect of both detrending techniques on transits SNR, and intuitively suggests that this degradation due to detrending is strongly dependent on the correlated noise characteristics encountered.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/plot_issues/figures/issue2.pdf}
+        \includegraphics[width=\linewidth]{./issue2.pdf}
         \caption{In each plot on the left, correlated noises simulated using a GP with an SHO kernel are added (blue line) to an original light curve containing a transit of depth $\Delta = 0.8\%$, duration $D=0.1$ day, and white noise with a standard deviation of 0.15\% (top left). The hyperparameters of the kernel are fixed to $Q=10$ and $\sigma=0.8\%$, with the pulsation $\omega$ increasing from top to bottom. The resulting stellar variability signals are then reconstructed using (in purple) Tukey's bi-weight filter with an optimal window size of $3\times D$  (see \citealt{wotan}), and (in red) a GP with the same kernel used to simulate the data. In each case the variability is reconstructed, subtracted, and the transit SNR computed using \autoref{eq:snr}. \codelink{workflows/plot_issues/scripts/plot_issue_2.py}}
         \label{fig:issue2}
     \end{centering}
@@ -105,7 +105,7 @@ where $\tau$ is the relative timescale of the variability with respect to the tr
 For each of the 10 000 light curves generated, we separately reconstruct and detrend the variability signal using the two techniques employed in \autoref{fig:issue2}, i.e.\;one using an optimal bi-weight filter with a window size three times that of the transit duration \citep{wotan} and the other using a GP with an optimal kernel. We then compute the detrended transit SNR using \autoref{eq:snr}.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/cleaning_snr/figures/result.pdf}
+        \includegraphics[width=\linewidth]{./result.pdf}
         \caption{Transit SNR computed for 10 000 differential light curves with varying morphological characteristics. All light curves span 2.8 days with an exposure time of 2 minutes and contain the same transit signal of  duration $D=1$ hour, depth of 0.5\% and white noise with a standard deviation of 0.1\%. Light curves at the top and right side of the central plot are shown with their corresponding $\tau$ and $\delta$ values, which again correspond to the relative timescale of stellar variability against the transit duration, and the relative amplitude of stellar variability against the transit depth. The two central plots show the transit SNR after detrending the light curves with one of two methods. On the left, light curves are detrended using Tukey's bi-weight filter with an optimal window size of $3\times D$ (see \citealt{wotan}), while on the right, light curves are detrended using a GP with the same kernel used to simulate the data. \codelink{workflows/cleaning_snr/scripts/plot.py}}
         \label{fig:snr_detrend}
     \end{centering}
@@ -149,7 +149,7 @@ The goal of the linear search is to compute the likelihood $p(\bm{f} \vert T_0 ,
 An example of such a grid of likelihoods is shown in \autoref{fig:linear_search}. To prepare for the next step, uncertainties on the depths $\sigma_{i,j}$ are also computed using \autoref{eq:ls} and stored.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/principle/figures/principle_linear_search.pdf}
+        \includegraphics[width=\linewidth]{./principle_linear_search.pdf}
         \caption{Principle and output of the linear search. The simulated dataset (top) corresponds to the one shown and described in \autoref{fig:app_principle_dataset}. First, a set of durations and depths $\set{T_i, D_j}_{i,j}$ is generated. For each pair of indices $(i,j)$, the likelihood $\ln p(\bm{f} \vert T_i ,D_j, \Delta_{i,j})$ is computed using the parameters from \autoref{eq:ls} and the expression of \autoref{eq:linear_search_ll}. This process yields the grid of log-likelihoods $\ln\mathcal{L}$ (bottom plot), as well as the $\set{\Delta_{i,j}, \sigma_{i,j}}_{i, j}$ transit depths and errors inferred linearly using \autoref{eq:ls}. \codelink{workflows/principle/principle.ipynb}}
         \label{fig:linear_search}
     \end{centering}
@@ -185,7 +185,7 @@ shown for few periods in \autoref{fig:periodic_search}. In the latter equation, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{../workflows/principle/figures/principle_periodic_1.pdf}\\
+    \includegraphics[width=\linewidth]{./principle_periodic_1.pdf}\\
     \caption{Periodic search likelihood $\mathcal{P}(P)$ computed for different trial periods $P$. Notice how the maximum value of $\mathcal{P}$ for the alias period $P=0.35$ day (left plot) is lower than for $P=2\times 0.35=0.7$ day, a result of combining the log-likelihoods using \autoref{eq:result} instead of \autoref{eq:attempt}, in favor of individual transits matching a common depth $\Delta$. \codelink{workflows/principle/principle.ipynb}}
     \label{fig:periodic_search}
 \end{figure}
@@ -195,7 +195,7 @@ shown for few periods in \autoref{fig:periodic_search}. In the latter equation, 
 Using \autoref{eq:result}, we can now compute $\ln\mathcal{P}$ for a range of periods and phases, and build a transit search periodogram using \autoref{eq:periodogram}. This has two disadvantages: First, each likelihood $p(\bm{f} \vert T_0, D, \Delta)$ estimated during the linear search is computed using N measurements. Hence, combining transits in the periodic search, through $\Delta_k$, $\sigma_k$ and the product of $K$ likelihoods $\set{\mathcal{L}_k}_k$ (see \autoref{eq:result}), artificially leads to a likelihood involving up to $N\times K$ measurements. For this reason, one has to normalize each likelihood $\ln\mathcal{P}$, by keeping track of the number of points used to compute each of them, which differs from one phase to another. Second, the maximum value of the likelihood $\ln\mathcal{P}$ is relative to a given dataset, so that a more intuitive and absolute metric must be used to relate to the transit signal detection (such as the Signal Detection Efficiency in \citealt{bls}). This motivates a final step to produce an interpretable transit search periodogram $\mathcal{Q}$. 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/principle/figures/principle_Q.pdf}
+        \includegraphics[width=\linewidth]{./principle_Q.pdf}
         \caption{For each period $P$, the joint likelihood $\mathcal{P}(P)$ is computed using \autoref{eq:result}, and the value of the maximum likelihood transit SNR retained as $\mathcal{Q}(P)$. \codelink{workflows/principle/principle.ipynb}}
         \label{fig:periodogram}
     \end{centering}
@@ -246,7 +246,7 @@ These results demonstrate the qualitative match between the detection capabiliti
 
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/control_test_bls/figures/control_test.pdf}
+        \includegraphics[width=\linewidth]{./control_test.pdf}
         \caption{Binned statistics of the injection-recovery of 4000 transit signals in a flat light curve with only white noise using \textsf{BLS} and \nuancecode{}. The color scale indicates the recovery of transits in the corresponding (period, depth) parameter space, white for a full recovery and black for no detection. \codelink{workflows/control_test_bls/scripts/plot.py}}
         \label{fig:control}
     \end{centering}
@@ -276,7 +276,7 @@ where $\mathcal{U}(a, b)$ denotes a uniform distribution of lower bound $a$ and 
 The results of this injection-recovery procedure are shown in \autoref{fig:simu} and highlight particularly well the benefit of \textsf{nuance} against most other methods. Except for the \texttt{GP+BLS} approach, \nuancecode{} leads to a much higher rate of true positives for transits with relatively small depths compared to the stellar variability amplitude (i.e.\;$\delta>2$), and a duration comparable to the stellar variability period (i.e.\;$\tau<2$). On the other hand, the \texttt{GP+BLS} strategy seems almost as performant as \nuancecode, recovering most of the injected transits and only lacking detection in a relatively comparable portion of the $(\tau, \delta)$ parameter space. We note that these empirical statements only concern simulated light curves with a given amount of white noise, and may vary depending on the length of the observing window or the number of transits. For this reason, quantifying for which values of $(\tau, \delta)$ \textsf{nuance} outperform these methods would only apply to this specific but representative example. However, we verify that our conclusions remain qualitatively valid for various simulation setups.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/synthetic-injection-recovery/figures/synthetic_ir.pdf}
+        \includegraphics[width=\linewidth]{./synthetic_ir.pdf}
         \caption{Rate of true positives for the 4000 simulated light curves. The color scale represents the fraction of true positives, white if all injected transits are recovered in a given portion of the $(\tau, \delta)$ parameter space, black if none are recovered. \codelink{workflows/synthetic-injection-recovery/scripts/plot.py}}
         \label{fig:simu}
     \end{centering}
@@ -330,14 +330,14 @@ For all techniques, we only search for transits with a duration fixed to the kno
 An example of the transit injection-recovery and its result is shown in \autoref{1019692} for the target TIC 1019692, \review{a representative example of the kind of stellar variability encountered in our dataset}. \autoref{fig:allsearch} shows the global results of the injection-recovery for all targets, while \autoref{fig:allsearch_relative} shows the true and false positives plotted against the relative parameters $\tau$ and $\delta$ (defined in \autoref{eq:relative_params}). These figures are a synthesis of \autoref{fig:allsearchim}, which shows the rate of true and false positives binned in the full parameter space $(\tau, \delta)$.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/tess_injection_recovery/figures/tpfp_bars.pdf}
+        \includegraphics[width=\linewidth]{./tpfp_bars.pdf}
         \caption{Rate of true and false positives for all methods as a fraction of detectable transit signals. \codelink{workflows/tess_injection_recovery/scripts/plot_tpfp.py}}
         \label{fig:allsearch}
     \end{centering}
 \end{figure}
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/tess_injection_recovery/figures/tpfp.pdf}
+        \includegraphics[width=\linewidth]{./tpfp.pdf}
         \caption{Rate of true and false positives of \nuancecode{} compared to other methods, as a function of the relative parameters $\tau$ and $\delta$. The solid blue line corresponds to the maximum of true positives among all methods on the top panel (dominated \review{by the \texttt{harmonics+BLS} method}), and the minimum of false positives on the bottom panel (waned by the \texttt{GP+BLS} method, all other methods being above \nuancecode{}). \codelink{workflows/tess_injection_recovery/scripts/plot_tpfp.py}}
         \label{fig:allsearch_relative}
     \end{centering}
@@ -345,7 +345,7 @@ An example of the transit injection-recovery and its result is shown in \autoref
 Compared to other techniques, we find that \nuancecode{} leads to the highest number of true positives, with a successful detection of 76\% of the 7008 detectable transits injected (\autoref{fig:allsearch}). While the performances of other methods strongly depend on the characteristics of the variability, \textbf{\nuancecode{} is the best technique in 93\% of cases, leading to both the highest number of true positives and the lowest number of false positives} (\autoref{fig:allsearch}).\\\\
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/tess_injection_recovery/figures/tpfp_ims.pdf}
+        \includegraphics[width=\linewidth]{./tpfp_ims.pdf}
         \caption{Rate of true and false positives binned over the full parameter space $(\tau, \delta)$ for all methods and all targets. \codelink{workflows/tess_injection_recovery/scripts/plot_tpfp.py}}
         \label{fig:allsearchim}
     \end{centering}
@@ -354,7 +354,7 @@ From \autoref{fig:allsearch}, we note that the number of true positives of the \
 \review{Finally, in \autoref{fig:tpfp_radius}, we observe a dependence between the rate of true positives and the injected planets radii. Overall \texttt{nuance} leads to significantly higher true positives in all radii bins compared to other methods, except for \texttt{BLS+harmonics} (which dominates other methods), which shows a similar yield for planets with radii less than 2$R_\oplus$. Hence, we note that the advantage of \texttt{nuance} is particularly significant for planets larger than 2$R_\oplus$. This can be explained by the fact that, for a transit signal to be comparable to a high-amplitude stellar variability signal, i.e. when \texttt{nuance} shows an advantage, a larger transit depth, hence a larger planetary radius, is required. Although this particular result highly depends on the variability present in the studied dataset, we conclude that \textbf{the performance of \nuance{} is not sensitive to the searched planets' radii.}}\\\\
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=0.6\linewidth]{../workflows/tess_injection_recovery/figures/tpfp_radius.pdf}
+        \includegraphics[width=0.6\linewidth]{./tpfp_radius.pdf}
         \caption{\review{Rate of true and false positives of \nuancecode{} compared to other methods, as a function of the injected planet's radius. The solid blue line corresponds to the maximum of true positives among all other methods than \nuance{} (dominated by the \texttt{harmonics+BLS} method).}{} \codelink{workflows/tess_injection_recovery/radii.ipynb}}
         \label{fig:tpfp_radius}
     \end{centering}
@@ -364,7 +364,7 @@ From \autoref{fig:allsearch}, we note that the number of true positives of the \
 \subsection{Comparison for a multi-sector TESS candidate: TOI-540}\label{toi540}
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/comparison_toi/figures/TOI 540/4.pdf}
+        \includegraphics[width=\linewidth]{./TOI_540/4.pdf}
         \caption{Sector 4 light curve of TOI 540. The cleaned signal (gray points) has been masked for flares (black points), and the black line corresponds to the mean of the GP model. \codelink{workflows/comparison_toi/scripts/plot_light_curve.py}}
         \label{fig:toi540_clean}
     \end{centering}
@@ -374,7 +374,7 @@ We downloaded the 2 minute cadence SPOC PDCSAP light curves of TOI-540 observed 
 For each sector, we perform the linear search of nuance on the cleaned light curve, using the original times as the trial epochs and 10 trial transit durations linearly sampled from 15 minutes to 1.5 hours. We then perform the periodic search on all sectors combined, using a concatenation of all linear searches. By adopting this by-sector GP modeling of the light-curve, the linear search of \nuance{} scales linearly with the number of sectors being processed.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/comparison_toi/figures/TOI 540/periodograms.pdf} 
+        \includegraphics[width=\linewidth]{./TOI_540/periodograms.pdf} 
         \caption{Transit search SNR periodograms of TOI-540 using \texttt{bi-weight+BLS} and \nuance{}. After a first periodic search (left panel), the epochs corresponding to the maximum-SNR transit are masked before the second search is performed (right panel). \codelink{workflows/comparison_toi/scripts/plot_periodograms.py}}
         \label{fig:toi540_periodograms}
     \end{centering}
@@ -394,7 +394,7 @@ In the previous section, we demonstrated the capability of \nuance{} to search f
 \noindent In \autoref{fig:blsvsnuance}, the processing time of \nuancecode{} linear and periodic search are recorded against the number of points in a simulated light curve, assuming a simple un-optimized GP with a squared exponential kernel. These are compared to the processing time of \texttt{bi-weight+BLS} (see \autoref{simu}) separated into the bi-weight filtering step and the BLS search.
 \begin{figure}[H]
     \begin{centering}
-        \includegraphics[width=\linewidth]{../workflows/benchmark/figures/nuance_vs_bls.pdf}
+        \includegraphics[width=\linewidth]{./nuance_vs_bls.pdf}
         \caption{Study of \textsf{nuance} (black line) processing time against \texttt{bi-weight+BLS} (see \autoref{simu}, blue line). The gray curve shows the performance of \textsf{nuance} linear search when applied to chunks of 10 000 points continuous observations, instead of considering these observations all together. This study is performed on a single CPU core of an Apple M2 Max chip. While not being shown, we verify that both the BLS algorithm and \nuancemethod{} processing times scale linearly with the number of trial transit durations and orbital periods. \codelink{workflows/benchmark/scripts/plot.py}}
         \label{fig:blsvsnuance}
     \end{centering}
