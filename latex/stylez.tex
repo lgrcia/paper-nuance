@@ -1,0 +1,58 @@
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{bm}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{soul}
+\usepackage{fontawesome}
+
+% commands
+\newcommand{\nuancemethod}{\textit{nuance}}
+\newcommand{\nuance}{\nuancemethod{}}
+\newcommand{\nuancecode}{\textsf{nuance}}
+
+\newcommand{\TODO}{\texttt{todo}}
+\newcommand{\review}[1]{#1}
+% \newcommand{\review}[1]{#1} 
+\newcommand{\set}[1]{\{\,#1\,\}}
+\newcommand{\footlink}[1]{\footnote{\url{#1}}}
+\newcommand{\wtls}{\texttt{bi-weight+BLS}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\let\subsectionautorefname\sectionautorefname
+\let\subsubsectionautorefname\sectionautorefname
+
+% no indent
+\setlength\parindent{0pt}
+
+% code style
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{white},
+    commentstyle=\color{gray!70},
+    keywordstyle=\color{Bittersweet},
+    stringstyle=\color{RoyalBlue},
+    basicstyle=\fontsize{8.5}{13}\fontfamily{DejaVuSansMono-TLF}\selectfont,
+    breakatwhitespace=false,         
+    breaklines=true,
+    rulecolor=\color{black!15},
+    numbers=none,
+    numberstyle=\fontsize{7}{11}\fontfamily{DejaVuSansMono-TLF}\selectfont\color{gray!50},
+    framerule=0pt,
+    breakindent=5pt,
+    resetmargins=true,
+    numbersep=10pt,
+    frame=single,
+    aboveskip=1em,
+    belowskip=1em,
+    xleftmargin=6pt,
+    framexleftmargin=4pt
+}
+\lstset{style=mystyle}
+
+\definecolor{linkcolor}{rgb}{0.1216,0.4667,0.7059}
+\newcommand{\codeicon}{{\color{linkcolor}\faFileCodeO}}
+\newcommand{\codelink}[1]{\href{https://github.com/lgrcia/paper-nuance/blob/main/#1}{\codeicon}\,\,}
+\newcommand{\outcodelink}[1]{\href{#1}{\codeicon}\,\,}
+\newcommand{\gitlink}[1]{\href{#1}{\color{linkcolor}\faGithub}\,\,}
