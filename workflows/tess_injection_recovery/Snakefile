@@ -21,8 +21,8 @@ rule all:
         [f"results/{method}.npy" for method in methods.keys()],
         "figures/tpfp_bars.pdf", 
         "figures/tpfp.pdf",
-        "figures/searched/1019692.pdf",
-        "figures/cleaned/1019692.pdf",
+        "_figures/searched/1019692.pdf",
+        "_figures/cleaned/1019692.pdf",
         "results/stats.yaml"
 
 rule compute_true_false_positives:

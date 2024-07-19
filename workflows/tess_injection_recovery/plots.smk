@@ -17,7 +17,7 @@ rule plot_lc:
         gp="data/{target}/gp.yaml",
         info="data/{target}/info.yaml",
         raw="data/{target}/original.fluxes"
-    output: "figures/cleaned/{target}.pdf"
+    output: "_figures/cleaned/{target}.pdf"
     script: "scripts/plot_lc.py"
 
 rule plot_single_comparison:
@@ -29,7 +29,7 @@ rule plot_single_comparison:
         gp="data/{target}/gp.yaml",
     params:
         methods = methods
-    output: "figures/searched/{target}.pdf"
+    output: "_figures/searched/{target}.pdf"
     script: "scripts/plot_comparison.py"
 
 # rule plot_results:

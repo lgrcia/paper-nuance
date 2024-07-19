@@ -1,6 +1,9 @@
 # *nuance* paper 
 Paper for [nuance](https://github.com/lgrcia/nuance), an algorithm to search for planetary transits in light curves featuring correlated noise, such as instrumental signals and stellar photometric variability ([pdf](./latex/paper.pdf))
 
+> [!NOTE] 
+> snakemake workflow is currently being cleaned up to allow full reproducibility.
+
 ## Running the workflows
 
 Here are the different workflows that need to be ran:
@@ -24,4 +27,10 @@ where the local path to the nuance package might be adapted to your specific clo
 In this environment, each workflow is run with
 ```shell
 snakemake -c12 --rerun-triggers input
+```
+
+## Moving all figures to a single folder
+
+```zsh
+sh ./copy_figures.sh
 ```

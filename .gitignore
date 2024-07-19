@@ -38,3 +38,5 @@ review_*
 **/.DS_Store
 **npy
 *.zip
+submission
+_figures
